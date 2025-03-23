@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Info } from "lucide-react"
+import { Info, BrickWall, Globe, CloudUpload, Github } from "lucide-react"
 
 export default function VMDashboard() {
   const [ip, setIp] = useState<string | null>(null);
@@ -75,6 +75,7 @@ export default function VMDashboard() {
 
       {/* Main content */}
       <main className="container mx-auto py-6">
+        <p className="text-lg mb-6">Welcome. You can whitelist yourself using the interface, as well as gather useful information</p>
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-semibold">{vmData.instanceName}</h1>
@@ -82,6 +83,7 @@ export default function VMDashboard() {
             <p className="text-sm text-muted-foreground">Your IPV4 address: {ip ? ip : "Fetching..."}</p>
 
           </div>
+          <Button size={"icon"} icon={Github}></Button>
         </div>
 
         {/* Status card */}
@@ -122,8 +124,12 @@ export default function VMDashboard() {
               <span className="hidden sm:inline">Details</span>
             </TabsTrigger>
             <TabsTrigger value="MOTD" className="flex items-center gap-1">
-              <Info className="h-4 w-4" />
+              <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">MOTD</span>
+            </TabsTrigger>
+            <TabsTrigger value="firewall" className="flex items-center gap-1">
+              <BrickWall className="h-4 w-4" />
+              <span className="hidden sm:inline">Firewall</span>
             </TabsTrigger>
           </TabsList>
 
@@ -180,7 +186,7 @@ export default function VMDashboard() {
               </CardContent>
             </Card>
             <div>
-              <Button variant={"outline"} size={"lg"}>
+              <Button variant={"outline"} size={"lg"} icon={CloudUpload} iconPosition="right">
                 <p className="font-ember">Add your IP</p>
               </Button>
             </div>

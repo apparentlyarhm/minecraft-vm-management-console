@@ -17,8 +17,8 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
+        sm: "h-9 rounded-lg px-3",
+        lg: "h-11 rounded-lg px-8",
         icon: "h-10 w-10",
       },
     },
@@ -33,16 +33,25 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  icon?: React.ElementType
+  iconPosition?: "left" | "right"
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, icon: Icon, iconPosition = "left", children, ...props }, ref) => {
     return (
       <button
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size }),
+        "flex items-center gap-2", // Ensures spacing between icon and text
+        className
+    )}
         ref={ref}
-        {...props}
-      />
+        {...props} 
+      >
+        {Icon && iconPosition === "left" && <Icon className="h-5 w-5" />} {/* Icon on the left */}
+        {children}
+        {Icon && iconPosition === "right" && <Icon className="h-5 w-5" />} {/* Icon on the right */}
+        </button>
     )
   }
 )
