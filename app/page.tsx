@@ -1,16 +1,23 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Info } from "lucide-react"
 
 export default function VMDashboard() {
-  // Sample VM data - this would come from your API
+  const [ip, setIp] = useState<string | null>(null);
+
   const vmData = {
     instanceName: "munecraft",
+    machineType: "c2d-standard-4",
+    instanceId: "2146535245022333325",
     status: "RUNNING",
     creationTimestamp: "2025-03-02T02:48:07.767-08:00",
     publicIp: "34.143.138.93",
+    cpuPlatform: "AMD Milan",
     cpuCores: 4,
     memoryMb: 16384,
     maxPersistentDisksGb: 263168,
@@ -44,13 +51,26 @@ export default function VMDashboard() {
     securityGroups: ["default", "allow-minecraft"],
   }
 
+  useEffect(() => {
+    fetchIP();
+  })
+
+  const fetchIP = async () => {
+    try {
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+      setIp(data.ip); // Extract and store the IP address
+    } catch (error) {
+      console.error("Failed to fetch IP:", error);
+    }
+  };
   // Format creation date
   const creationDate = new Date(vmData.creationTimestamp)
   const formattedDate = creationDate.toLocaleString()
 
   // Convert memory from MB to GB for display
   const memoryGb = vmData.memoryMb / 1024
-  const maxStorageTb = vmData.maxPersistentDisksGb / 1024
+  const maxStorageGb = vmData.maxPersistentDisksGb / 1024 / 1024
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -60,7 +80,9 @@ export default function VMDashboard() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-semibold">{vmData.instanceName}</h1>
-            <p className="text-sm text-muted-foreground">Instance ID: i-0123456789abcdef0</p>
+            <p className="text-sm text-muted-foreground">Instance ID: {vmData.instanceId}</p>
+            <p className="text-sm text-muted-foreground">Your IPV4 address: {ip ? ip : "Fetching..."}</p>
+
           </div>
         </div>
 
@@ -88,7 +110,7 @@ export default function VMDashboard() {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Instance type</h3>
-                <p>{vmData.instanceType}</p>
+                <p>{vmData.machineType}</p>
               </div>
             </div>
           </CardContent>
@@ -115,7 +137,7 @@ export default function VMDashboard() {
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Instance ID</h3>
-                      <p>i-0123456789abcdef0</p>
+                      <p>{vmData.instanceId}</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Instance name</h3>
@@ -123,7 +145,7 @@ export default function VMDashboard() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Instance type</h3>
-                      <p>{vmData.instanceType}</p>
+                      <p>{vmData.machineType}</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Availability zone</h3>
@@ -137,7 +159,7 @@ export default function VMDashboard() {
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Platform</h3>
-                      <p>{vmData.operatingSystem}</p>
+                      <p>{vmData.cpuPlatform}</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">vCPU</h3>
@@ -148,17 +170,18 @@ export default function VMDashboard() {
                       <p>{memoryGb} GB</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Max storage capacity</h3>
-                      <p>{maxStorageTb.toFixed(2)} TB</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Status checks</h3>
-                      <p className="text-green-600">2/2 checks passed</p>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Used storage</h3>
+                      <p>{maxStorageGb.toFixed(2)} GB</p>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+            <div>
+              <Button variant={"outline"} size={"lg"}>
+                <p className="font-ember">Add your IP</p>
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
