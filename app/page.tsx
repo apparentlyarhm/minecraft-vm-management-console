@@ -59,16 +59,14 @@ export default function VMDashboard() {
     try {
       const response = await fetch("https://api.ipify.org?format=json");
       const data = await response.json();
-      setIp(data.ip); // Extract and store the IP address
+      setIp(data.ip);
     } catch (error) {
       console.error("Failed to fetch IP:", error);
     }
   };
-  // Format creation date
   const creationDate = new Date(vmData.creationTimestamp)
   const formattedDate = creationDate.toLocaleString()
 
-  // Convert memory from MB to GB for display
   const memoryGb = vmData.memoryMb / 1024
   const maxStorageGb = vmData.maxPersistentDisksGb / 1024 / 1024
 
@@ -122,6 +120,10 @@ export default function VMDashboard() {
             <TabsTrigger value="details" className="flex items-center gap-1">
               <Info className="h-4 w-4" />
               <span className="hidden sm:inline">Details</span>
+            </TabsTrigger>
+            <TabsTrigger value="MOTD" className="flex items-center gap-1">
+              <Info className="h-4 w-4" />
+              <span className="hidden sm:inline">MOTD</span>
             </TabsTrigger>
           </TabsList>
 
