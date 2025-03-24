@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Info, BrickWall, Globe, CloudUpload, Github, CopyIcon, Monitor } from "lucide-react"
+import { Info, BrickWall, Globe, CloudUpload, Github, CopyIcon, Monitor, CircleCheck, CircleAlert, XCircle } from "lucide-react"
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
 import {tabs} from "../lib/config/tabsConfig"; 
+import { details } from "../lib/config/tabs/details";
 import { tr } from "framer-motion/client";
 
 export default function VMDashboard() {
@@ -23,13 +24,31 @@ const [fetchFailed, setFetchFailed] = useState(false);
   const[isVmInfoFetching, setIsVmInfoFetching] = useState(false);
 
   const handleIpAdd = async () => {
-    success({
+    info({
       heading: "Request sent",
       message: "IP will be added",
       duration: 2000,
-    })
-  }
-
+    });
+  
+    setTimeout(() => {
+      const isSuccess = Math.random() > 0.5; // 50% chance of success or failure
+  
+      if (isSuccess) {
+        success({
+          heading: "Success",
+          message: "IP added successfully!",
+          duration: 3000,
+        });
+      } else {
+        error({
+          heading: "Failed",
+          message: "Failed to add IP. Please try again.",
+          duration: 3000,
+        });
+      }
+    }, 2500);
+  };
+  
   const handleIpCopy = async () => {
   
     try {
@@ -53,12 +72,23 @@ const [fetchFailed, setFetchFailed] = useState(false);
     }
   };
 
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case "RUNNING":
+        return { variant: "success", bg: "bg-green-100 text-green-800", icon: CircleCheck };
+      case "PROVISIONING":
+        return { variant: "success", bg: "bg-blue-100 text-blue-800", icon: CircleAlert };
+      default:
+        return { variant: "success", bg: "bg-red-100 text-red-800", icon: XCircle };
+    }
+  };
+
   const vmData = {
     instanceName: "munecraft",
     machineType: "c2d-standard-4",
     instanceId: "2146535245022333325",
     region: "asia-southeast1-b",
-    status: "RUNNING",
+    status: "PROVISIONING",
     creationTimestamp: "2025-03-02T02:48:07.767-08:00",
     publicIp: "34.143.138.93",
     cpuPlatform: "AMD Milan",
@@ -67,6 +97,7 @@ const [fetchFailed, setFetchFailed] = useState(false);
     maxPersistentDisksGb: 263168,
   }
 
+  const { variant, bg, icon: Icon } = getStatusStyles(vmData.status);
   useEffect(() => {
     const fetchIP = async () => {
       try {
@@ -123,11 +154,8 @@ const [fetchFailed, setFetchFailed] = useState(false);
             <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Status</h3>
                 <div className="flex items-center gap-2">
-                  <Badge
-                    variant={vmData.status === "RUNNING" ? "success" : "destructive"}
-                    className="bg-green-100 text-green-800 hover:bg-green-100"
-                  >
-                    {vmData.status}
+                  <Badge variant="success" className={`${bg} hover:${bg}`}>
+                    <Icon className="w-4 h-4 mr-1 inline-block" /> {vmData.status}
                   </Badge>
                 </div>
               </div>
@@ -153,7 +181,7 @@ const [fetchFailed, setFetchFailed] = useState(false);
 
           <TabsList className="grid grid-cols-7 w-full">
           {tabs.map(({ value, label, icon: Icon }) => (
-            <TabsTrigger key={value} value={value} className="flex items-center gap-1">
+            <TabsTrigger key={value} value={value} className="flex items-center gap-2">
             <Icon className="h-4 w-4" />
             <span className="hidden sm:inline">{label}</span>
         </TabsTrigger>
@@ -165,8 +193,8 @@ const [fetchFailed, setFetchFailed] = useState(false);
             <Card className="min-h-[400px]">
               
               <CardHeader>
-                <CardTitle>Instance details</CardTitle>
-                <CardDescription>Detailed information about this instance</CardDescription>
+                <CardTitle>{details.cardTitle}</CardTitle>
+                <CardDescription>{details.cardDescription}</CardDescription>
               </CardHeader>
               <CardContent>
               {isVmInfoFetching ? (
@@ -223,12 +251,7 @@ const [fetchFailed, setFetchFailed] = useState(false);
         </Tabs>
         <div className="mt-6">
             <>
-    {fetchFailed && (
-      <p className="text-red-500 text-sm">
-        Failed to fetch IP. Please reload the page.
-      </p>
-    )}
-    <Button
+            <Button
       variant="outline"
       onClick={handleIpAdd}
       size="lg"
@@ -238,6 +261,12 @@ const [fetchFailed, setFetchFailed] = useState(false);
     >
       <p className="font-ember">Add your IP</p>
     </Button>
+    {fetchFailed && (
+      <p className="text-red-400 text-sm mt-4">
+        Failed to fetch IP. Please reload the page.
+      </p>
+    )}
+   
   </>
             </div>
       </main>
