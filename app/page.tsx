@@ -5,10 +5,42 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Info, BrickWall, Globe, CloudUpload, Github } from "lucide-react"
+import { Info, BrickWall, Globe, CloudUpload, Github, CopyIcon } from "lucide-react"
+import { useToast } from "@/components/context/ToastContext";
+import {Spinner} from "@heroui/spinner";
+import { tr } from "framer-motion/client";
 
 export default function VMDashboard() {
   const [ip, setIp] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(true);
+const [fetchFailed, setFetchFailed] = useState(false);
+
+  const [copied, setCopied] = useState(false);
+
+  const { success, error } = useToast(); 
+  
+
+  const handleIpCopy = async () => {
+  
+    try {
+      await navigator.clipboard.writeText(vmData.publicIp);
+      success({
+        heading: "Copied!",
+        message: "Public IPv4 address copied to clipboard.",
+        duration: 3000, 
+      });
+  
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); 
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      error({
+        heading: "Copy Failed",
+        message: "Could not copy the IP address. Please try again.",
+        duration: 3000,
+      });
+    }
+  };
 
   const vmData = {
     instanceName: "munecraft",
@@ -52,18 +84,26 @@ export default function VMDashboard() {
   }
 
   useEffect(() => {
+    const fetchIP = async () => {
+      try {
+        const response = await fetch("https://api.ipify.org?format=json");
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setIp(data.ip);
+        setFetchFailed(false); // Ensure failure flag is reset
+      } catch (error) {
+        console.error("Failed to fetch IP:", error);
+        setFetchFailed(true);
+      } finally {
+        setIsFetching(false); // Always stop fetching
+      }
+    };
+  
     fetchIP();
-  })
-
-  const fetchIP = async () => {
-    try {
-      const response = await fetch("https://api.ipify.org?format=json");
-      const data = await response.json();
-      setIp(data.ip);
-    } catch (error) {
-      console.error("Failed to fetch IP:", error);
-    }
-  };
+  }, []); // Runs only on mount
+  
   const creationDate = new Date(vmData.creationTimestamp)
   const formattedDate = creationDate.toLocaleString()
 
@@ -75,15 +115,14 @@ export default function VMDashboard() {
 
       {/* Main content */}
       <main className="container mx-auto py-6">
-        <p className="text-lg mb-6">Welcome. You can whitelist yourself using the interface, as well as gather useful information</p>
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-semibold">{vmData.instanceName}</h1>
             <p className="text-sm text-muted-foreground">Instance ID: {vmData.instanceId}</p>
-            <p className="text-sm text-muted-foreground">Your IPV4 address: {ip ? ip : "Fetching..."}</p>
+            <p className="text-sm text-muted-foreground">Your IPv4 address: {ip ? ip : "Fetching..."}</p>
 
           </div>
-          <Button size={"icon"} icon={Github}></Button>
+          <Button size={"icon"} icon={Github} variant={"default"}></Button>
         </div>
 
         {/* Status card */}
@@ -106,7 +145,10 @@ export default function VMDashboard() {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Public IPv4 address</h3>
+                <div className="flex gap-3">
                 <p>{vmData.publicIp}</p>
+                <Button icon={CopyIcon} size={"icon"} onClick={handleIpCopy} customSize="h-5 w-5"></Button>
+                </div>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Instance type</h3>
@@ -118,6 +160,7 @@ export default function VMDashboard() {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="details">
+
           <TabsList className="grid grid-cols-7 w-full">
             <TabsTrigger value="details" className="flex items-center gap-1">
               <Info className="h-4 w-4" />
@@ -185,13 +228,27 @@ export default function VMDashboard() {
                 </div>
               </CardContent>
             </Card>
-            <div>
-              <Button variant={"outline"} size={"lg"} icon={CloudUpload} iconPosition="right">
-                <p className="font-ember">Add your IP</p>
-              </Button>
-            </div>
           </TabsContent>
+
         </Tabs>
+        <div className="mt-6">
+            <>
+    {fetchFailed && (
+      <p className="text-red-500 text-sm">
+        Failed to fetch IP. Please reload the page.
+      </p>
+    )}
+    <Button
+      variant="outline"
+      size="lg"
+      icon={CloudUpload}
+      iconPosition="right"
+      disabled={isFetching || fetchFailed} // ✅ Disabled while fetching or if failed
+    >
+      <p className="font-ember">Add your IP</p>
+    </Button>
+  </>
+            </div>
       </main>
     </div>
   )

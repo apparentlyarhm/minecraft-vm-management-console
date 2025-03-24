@@ -73,7 +73,7 @@
 }
 
 html {
-  font-family: 'Amazon Ember', sans-serif;
+  font-family: 'Amazon Ember', sans-serif !important;
 }
  
 @layer base {

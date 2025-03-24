@@ -23,7 +23,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "secondary",
       size: "default",
     },
   }
@@ -35,17 +35,21 @@ export interface ButtonProps
   asChild?: boolean
   icon?: React.ElementType
   iconPosition?: "left" | "right"
+  customSize?: string; // Allow manual size overrides
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, icon: Icon, iconPosition = "left", children, ...props }, ref) => {
+  ({ className, variant, size, disabled, asChild = false, icon: Icon, iconPosition = "left", children, customSize, ...props }, ref) => {
     return (
       <button
         className={cn(buttonVariants({ variant, size }),
-        "flex items-center gap-2", // Ensures spacing between icon and text
-        className
+        disabled && "opacity-50 cursor-not-allowed bg-gray-300 text-gray-500 border-gray-300",
+        customSize,
+        "flex items-center gap-2 cursor-pointer", // Ensures spacing between icon and text
+        className,
     )}
         ref={ref}
+        disabled={disabled} // Disables button functionality
         {...props} 
       >
         {Icon && iconPosition === "left" && <Icon className="h-5 w-5" />} {/* Icon on the left */}
