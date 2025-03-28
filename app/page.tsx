@@ -94,7 +94,7 @@ const [fetchFailed, setFetchFailed] = useState(false);
     cpuPlatform: "AMD Milan",
     cpuCores: 4,
     memoryMb: 16384,
-    maxPersistentDisksGb: 263168,
+    diskMb: 10000,
   }
 
   const { variant, bg, icon: Icon } = getStatusStyles(vmData.status);
@@ -123,7 +123,7 @@ const [fetchFailed, setFetchFailed] = useState(false);
   const formattedDate = creationDate.toLocaleString()
 
   const memoryGb = vmData.memoryMb / 1024
-  const maxStorageGb = vmData.maxPersistentDisksGb / 1024 / 1024
+  const diskGb = vmData.diskMb / 1024 
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -137,7 +137,16 @@ const [fetchFailed, setFetchFailed] = useState(false);
             <p className="text-sm text-muted-foreground">Your IPv4 address: {ip ? ip : "Fetching..."}</p>
 
           </div>
-          <Button size={"icon"} icon={Github} variant={"default"}></Button>
+          <Button
+      variant="outline"
+      onClick={handleIpAdd}
+      size="lg"
+      icon={CloudUpload}
+      iconPosition="right"
+      disabled={isFetching || fetchFailed || isVmInfoFetching} // ✅ Disabled while fetching or if failed
+    >
+      <p className="font-ember">Add your IP</p>
+    </Button>
         </div>
 
         {/* Status card */}
@@ -237,8 +246,8 @@ const [fetchFailed, setFetchFailed] = useState(false);
                                   <p>{memoryGb} GB</p>
                                 </div>
                                 <div>
-                                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Used storage</h3>
-                                  <p>{maxStorageGb.toFixed(2)} GB</p>
+                                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Disk Size</h3>
+                                  <p>{diskGb} GB</p>
                                 </div>
                               </div>
                             </div>
@@ -251,22 +260,12 @@ const [fetchFailed, setFetchFailed] = useState(false);
         </Tabs>
         <div className="mt-6">
             <>
-            <Button
-      variant="outline"
-      onClick={handleIpAdd}
-      size="lg"
-      icon={CloudUpload}
-      iconPosition="right"
-      disabled={isFetching || fetchFailed || isVmInfoFetching} // ✅ Disabled while fetching or if failed
-    >
-      <p className="font-ember">Add your IP</p>
-    </Button>
-    {fetchFailed && (
+            
+            {fetchFailed && (
       <p className="text-red-400 text-sm mt-4">
         Failed to fetch IP. Please reload the page.
       </p>
     )}
-   
   </>
             </div>
       </main>
