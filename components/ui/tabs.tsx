@@ -1,9 +1,17 @@
-import * as React from "react"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
+import * as React from "react";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Spinner from "@/components/ui/Spinner";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-const Tabs = TabsPrimitive.Root
+const Tabs = TabsPrimitive.Root;
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
@@ -17,8 +25,8 @@ const TabsList = React.forwardRef<
     )}
     {...props}
   />
-))
-TabsList.displayName = TabsPrimitive.List.displayName
+));
+TabsList.displayName = TabsPrimitive.List.displayName;
 
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
@@ -32,8 +40,8 @@ const TabsTrigger = React.forwardRef<
     )}
     {...props}
   />
-))
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
+));
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
@@ -47,7 +55,48 @@ const TabsContent = React.forwardRef<
     )}
     {...props}
   />
-))
-TabsContent.displayName = TabsPrimitive.Content.displayName
-
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+));
+TabsContent.displayName = TabsPrimitive.Content.displayName;
+const GenericDetailsTab = ({
+  value,
+  title,
+  description,
+  detailsMap,
+  aliases = {},
+  isLoading,
+}: {
+  value: string;
+  title: string;
+  description: string;
+  detailsMap: Record<string, string | number>;
+  aliases?: Record<string, string>;
+  isLoading: boolean;
+}) => {
+  return (
+    <TabsContent value={value} className="space-y-4 pt-4">
+      <Card className="min-h-[400px]">
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <Spinner />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.entries(detailsMap).map(([key, value]) => (
+                <div key={key}>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                    {aliases[key] || key}
+                  </h3>
+                  <p>{value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </TabsContent>
+  );
+};
+export { Tabs, TabsList, TabsTrigger, TabsContent, GenericDetailsTab };
