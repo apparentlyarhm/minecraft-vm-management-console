@@ -1,5 +1,4 @@
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.example.com"; // Default to production
+const BASE_URL = "https://mc-validator-xrnd65hd7a-as.a.run.app";
 
 export const API_ENDPOINTS = {
   IP: `${BASE_URL}/api/v2/firewall/add-ip`,

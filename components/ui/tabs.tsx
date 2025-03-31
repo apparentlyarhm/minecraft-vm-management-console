@@ -68,7 +68,7 @@ const GenericDetailsTab = ({
   value: string;
   title: string;
   description: string;
-  detailsMap: Record<string, string | number>;
+  detailsMap: Record<string, string | number | string[]>;
   aliases?: Record<string, string>;
   isLoading: boolean;
 }) => {
@@ -89,7 +89,20 @@ const GenericDetailsTab = ({
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">
                     {aliases[key] || key}
                   </h3>
-                  <p>{value}</p>
+                  {Array.isArray(value) ? (
+                    <div className="flex flex-wrap gap-2">
+                      {value.map((item) => (
+                        <span
+                          key={item}
+                          className="bg-muted px-2 py-1 rounded text-xs text-muted-foreground"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>{value}</p>
+                  )}
                 </div>
               ))}
             </div>

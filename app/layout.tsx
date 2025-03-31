@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
+import { PrimeReactProvider } from "primereact/api";
 import { ToastProvider } from "@/components/context/ToastContext";
 import "./globals.css";
-import { tr } from "framer-motion/client";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,11 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-            <PrimeReactProvider value={{ unstyled: false }}>
-              <ToastProvider>
-              {children}
-              </ToastProvider>
-            </PrimeReactProvider>
+        <PrimeReactProvider value={{ unstyled: false }}>
+          <ToastProvider>{children}</ToastProvider>
+        </PrimeReactProvider>
       </body>
     </html>
   );

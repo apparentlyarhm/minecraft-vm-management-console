@@ -1,3 +1,5 @@
+import API_ENDPOINTS from "../config/endpointConfig";
+
 export type VmDetailsResponse = {
   instanceName: string;
   instanceZone: string;
@@ -23,17 +25,15 @@ export const vmAliases: Record<string, string> = {
   creationTimestamp: "Launch Time",
   cpuPlatform: "Platform",
   cpuCores: "vCPU",
-  memoryGb: "Memory",
-  diskGb: "Total Disk Size",
+  memoryMb: "Memory (MB)",
+  diskGb: "Total Disk Size (GB)",
 };
 
 export const fetchVmDetails = async (): Promise<
   Record<string, string | number>
 > => {
   try {
-    const response = await fetch(
-      "https://mc-validator-xrnd65hd7a-as.a.run.app/api/v2/machine"
-    );
+    const response = await fetch(API_ENDPOINTS.MACHINE);
     if (!response.ok) {
       throw new Error("Failed to fetch VM details");
     }

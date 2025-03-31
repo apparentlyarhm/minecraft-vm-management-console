@@ -18,13 +18,8 @@ import {
   GenericDetailsTab,
 } from "@/components/ui/tabs";
 import {
-  Info,
-  BrickWall,
-  Globe,
   CloudUpload,
-  Github,
   CopyIcon,
-  Monitor,
   CircleCheck,
   CircleAlert,
   XCircle,
@@ -32,8 +27,8 @@ import {
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
 import { tabs } from "../lib/config/tabsConfig";
-import { details } from "../lib/config/tabs/details";
-import { tr } from "framer-motion/client";
+import { fetchVmDetails, vmAliases } from "@/lib/component-utils/vmApiUtils";
+import { fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
 
 export default function VMDashboard() {
   const [ip, setIp] = useState<string | null>(null);
@@ -44,7 +39,17 @@ export default function VMDashboard() {
 
   const { success, error, info } = useToast();
 
+  // VM info state vars
   const [isVmInfoFetching, setIsVmInfoFetching] = useState(false);
+  const [details, setDetails] = useState<Record<string, string | number>>({});
+
+  // MOTD info state vars
+  const [motdDetails, setMotdDetails] = useState<
+    Record<string, string | number | string[]>
+  >({});
+  const [isMotdFetching, setIsMotdFetching] = useState(false);
+
+  const VmName = isVmInfoFetching ? "fetching.." : details["Instance Name"];
 
   const handleIpAdd = async () => {
     info({
@@ -75,7 +80,7 @@ export default function VMDashboard() {
   const handleIpCopy = async () => {
     try {
       console.log("inside copy");
-      await navigator.clipboard.writeText(vmData.publicIp);
+      await navigator.clipboard.writeText(details["Public IP"] as string);
       success({
         heading: "Copied!",
         message: "Public IPv4 address copied to clipboard.",
@@ -117,35 +122,38 @@ export default function VMDashboard() {
     }
   };
 
-  const vmData = {
-    instanceName: "munecraft",
-    machineType: "c2d-standard-4",
-    instanceId: "2146535245022333325",
-    region: "asia-southeast1-b",
-    status: "PROVISIONING",
-    creationTimestamp: "2025-03-02T02:48:07.767-08:00",
-    publicIp: "34.143.138.93",
-    cpuPlatform: "AMD Milan",
-    cpuCores: 4,
-    memoryMb: 16384,
-    diskMb: 10000,
-  };
+  useEffect(() => {
+    setIsVmInfoFetching(true);
 
-  const vmAliases = {
-    instanceId: "Instance ID",
-    instanceName: "Instance Name",
-    machineType: "Instance Type",
-    region: "Availability Zone",
-    publicIp: "Public IP",
-    status: "Status",
-    creationTimestamp: "Launch Time",
-    cpuPlatform: "Platform",
-    cpuCores: "vCPU",
-    memoryGb: "Memory",
-    diskGb: "Total Disk Size",
-  };
+    const getDetails = async () => {
+      const vmDetails = await fetchVmDetails();
+      setDetails(vmDetails);
+      setIsVmInfoFetching(false);
+    };
 
-  const { variant, bg, icon: Icon } = getStatusStyles(vmData.status);
+    getDetails();
+  }, []); // Fetch VM details once on mount
+
+  useEffect(() => {
+    if (!details["Public IP"]) return; // Ensure address exists before calling fetchMotd
+
+    setIsMotdFetching(true);
+
+    const getMotd = async () => {
+      const motd = await fetchMotd(details["Public IP"] as string);
+      setMotdDetails(motd);
+      setIsMotdFetching(false);
+    };
+
+    getMotd();
+  }, [details]); // Runs only when details update
+
+  const {
+    variant,
+    bg,
+    icon: Icon,
+  } = getStatusStyles(details["Status"] as string);
+
   useEffect(() => {
     const fetchIP = async () => {
       try {
@@ -167,23 +175,15 @@ export default function VMDashboard() {
     fetchIP();
   }, []); // Runs only on mount
 
-  const creationDate = new Date(vmData.creationTimestamp);
-  const formattedDate = creationDate.toLocaleString();
-
-  const memoryGb = vmData.memoryMb / 1024;
-  const diskGb = vmData.diskMb / 1024;
-
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
       {/* Main content */}
       <main className="container mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-semibold">
-              Instance "{vmData.instanceName}"
-            </h1>
+            <h1 className="text-2xl font-semibold">Instance "{VmName}"</h1>
             <p className="text-sm text-muted-foreground">
-              ID: {vmData.instanceId}
+              ID: {details["Instance ID"]}
             </p>
             <p className="text-sm text-muted-foreground">
               Your IPv4 address: {ip ? ip : "Fetching..."}
@@ -219,7 +219,7 @@ export default function VMDashboard() {
                     <div className="flex items-center gap-2">
                       <Badge variant="success" className={`${bg} hover:${bg}`}>
                         <Icon className="w-4 h-4 mr-1 inline-block" />{" "}
-                        {vmData.status}
+                        {details["Status"]}
                       </Badge>
                     </div>
                   </div>
@@ -228,7 +228,7 @@ export default function VMDashboard() {
                       Public IPv4 address
                     </h3>
                     <div className="flex gap-3">
-                      <p>{vmData.publicIp}</p>
+                      <p>{details["Public IP"]}</p>
                       <Button
                         icon={CopyIcon}
                         size={"icon"}
@@ -241,7 +241,7 @@ export default function VMDashboard() {
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       Instance type
                     </h3>
-                    <p>{vmData.machineType}</p>
+                    <p>{details["Instance Type"]}</p>
                   </div>
                 </>
               )}
@@ -249,7 +249,6 @@ export default function VMDashboard() {
           </CardContent>
         </Card>
 
-        {/* Tabs for different sections */}
         <Tabs defaultValue="details">
           <TabsList className="grid grid-cols-7 w-full">
             {tabs.map(({ value, label, icon: Icon }) => (
@@ -265,11 +264,19 @@ export default function VMDashboard() {
           </TabsList>
           <GenericDetailsTab
             value="details"
-            title="VM Details"
-            description="The instance details"
-            detailsMap={vmData}
+            title="Instance Details"
+            description="The instance details. This running however, does not guaratee that the server is up. Check MOTD."
+            detailsMap={details}
             aliases={vmAliases}
             isLoading={isVmInfoFetching}
+          />
+          <GenericDetailsTab
+            value="MOTD"
+            title="MOTD"
+            description="Message-of-the-day. This is directly queried from the server. Presence of this indicates that the server is UP."
+            detailsMap={motdDetails}
+            aliases={MOTDAliases}
+            isLoading={isMotdFetching}
           />
         </Tabs>
         <div className="mt-6">
