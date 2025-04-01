@@ -67,7 +67,7 @@
 
 @font-face {
   font-family: 'Amazon Ember';
-  src: url('/fonts/amazon/Ember Display/AmazonEmberDisplay_Rg.ttf'), format('ttf');
+  src: url('AmazonEmberDisplay_Rg.ttf'), format('ttf');
   font-weight: normal;
   font-style: normal;
 }

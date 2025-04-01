@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
+const isProd = process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH || "",
-  env: {
-    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-  },
+  basePath: isProd ? "/minecraft-vm-management-console" : "",
+  assetPrefix: isProd ? "/minecraft-vm-management-console/" : "",
 };
 
 export default nextConfig;
