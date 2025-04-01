@@ -6,19 +6,16 @@ import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
   Tabs,
-  TabsContent,
   TabsList,
   TabsTrigger,
   GenericDetailsTab,
 } from "@/components/ui/tabs";
 import {
-  CloudUpload,
   CopyIcon,
   CircleCheck,
   CircleAlert,
@@ -178,7 +175,7 @@ export default function VMDashboard() {
       <main className="container mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-semibold">Instance "{VmName}"</h1>
+            <h1 className="text-2xl font-semibold">Instance &#34;{VmName}&#34;</h1>
             <p className="text-sm text-muted-foreground">
               ID: {details["Instance ID"]}
             </p>

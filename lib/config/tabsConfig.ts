@@ -1,7 +1,6 @@
-import { Monitor, Globe, BrickWall, DollarSignIcon } from "lucide-react";
+import { Monitor, Globe } from "lucide-react";
 
 export const tabs = [
   { value: "details", label: "Details", icon: Monitor },
   { value: "MOTD", label: "MOTD", icon: Globe },
-  { value: "firewall", label: "Firewall", icon: BrickWall },
 ];

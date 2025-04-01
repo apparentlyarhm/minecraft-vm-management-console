@@ -1,4 +1,8 @@
-const BASE_URL = "https://mc-validator-xrnd65hd7a-as.a.run.app";
+if (!process.env.NEXT_PUBLIC_BASE_URL) {
+  throw new Error("❌ ERROR: NEXT_PUBLIC_BASE_URL is not set. Please check your environment variables.");
+}
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const API_ENDPOINTS = {
   IP: `${BASE_URL}/api/v2/firewall/add-ip`,

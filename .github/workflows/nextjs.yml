@@ -18,11 +18,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
+
       - name: Enforce NPM :D
         run: |
           if [ -f "yarn.lock" ] || [ -f "pnpm-lock.yaml" ]; then
@@ -31,6 +33,16 @@ jobs:
           else
             echo "✅ go ahead"
           fi
+
+      - name: Fetch Public URL from Secrets
+        run: |
+          if [ -z "${{ secrets.CLOUD_RUN_SERVICE_URL }}" ]; then
+            echo "❌ ERROR: CLOUD_RUN_SERVICE_URL secret is missing!" >&2
+            exit 1
+          fi
+            echo "NEXT_PUBLIC_BASE_URL=${{ secrets.CLOUD_RUN_SERVICE_URL }}" >> $GITHUB_ENV
+        
+
       - name: Setup Page
         uses: actions/configure-pages@v5
         with:

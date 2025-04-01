@@ -41,7 +41,7 @@ export const fetchMotd = async (
     }
     const data: MOTDResponse = await response.json();
 
-    let transformedData: Record<string, string | number | string[]> = {};
+    const transformedData: Record<string, string | number | string[]> = {};
 
     Object.entries(data).forEach(([key, value]) => {
       transformedData[MOTDAliases[key] || key] = value;

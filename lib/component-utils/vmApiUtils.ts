@@ -40,7 +40,7 @@ export const fetchVmDetails = async (): Promise<
 
     const data: VmDetailsResponse = await response.json();
 
-    let transformedData: Record<string, string | number> = {};
+    const transformedData: Record<string, string | number> = {};
 
     Object.entries(data).forEach(([key, value]) => {
       transformedData[vmAliases[key] || key] = value;
