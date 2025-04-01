@@ -26,11 +26,13 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
-import { tabs } from "../lib/config/tabsConfig";
+import { tabs } from "@/lib/config/tabsConfig";
 import { fetchVmDetails, vmAliases } from "@/lib/component-utils/vmApiUtils";
 import { fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
 
 export default function VMDashboard() {
+
+  // User IP state vars
   const [ip, setIp] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchFailed, setFetchFailed] = useState(false);
@@ -125,28 +127,23 @@ export default function VMDashboard() {
   useEffect(() => {
     setIsVmInfoFetching(true);
 
-    const getDetails = async () => {
-      const vmDetails = await fetchVmDetails();
-      setDetails(vmDetails);
-      setIsVmInfoFetching(false);
-    };
-
-    getDetails();
-  }, []); // Fetch VM details once on mount
+    fetchVmDetails()
+        .then((vmDetails) => setDetails(vmDetails))
+        .catch((error) => console.error("Error fetching VM details:", error))
+        .finally(() => setIsVmInfoFetching(false));
+  }, []);
 
   useEffect(() => {
     if (!details["Public IP"]) return; // Ensure address exists before calling fetchMotd
 
     setIsMotdFetching(true);
 
-    const getMotd = async () => {
-      const motd = await fetchMotd(details["Public IP"] as string);
-      setMotdDetails(motd);
-      setIsMotdFetching(false);
-    };
+    fetchMotd(details["Public IP"] as string)
+        .then((motd) => setMotdDetails(motd))
+        .catch((error) => console.error("Error fetching MOTD:", error))
+        .finally(() => setIsMotdFetching(false));
+  }, [details]);
 
-    getMotd();
-  }, [details]); // Runs only when details update
 
   const {
     variant,
@@ -189,7 +186,7 @@ export default function VMDashboard() {
               Your IPv4 address: {ip ? ip : "Fetching..."}
             </p>
           </div>
-          <Button
+          {/* <Button
             variant="outline"
             onClick={handleIpAdd}
             size="lg"
@@ -198,7 +195,7 @@ export default function VMDashboard() {
             disabled={isFetching || fetchFailed || isVmInfoFetching} // ✅ Disabled while fetching or if failed
           >
             <p className="font-ember">Add your IP</p>
-          </Button>
+          </Button> */}
         </div>
 
         {/* Status card */}
