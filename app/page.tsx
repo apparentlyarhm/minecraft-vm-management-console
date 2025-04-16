@@ -24,10 +24,15 @@ import {
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
 import { tabs } from "@/lib/config/tabsConfig";
-import { fetchVmDetails, vmAliases } from "@/lib/component-utils/vmApiUtils";
+import { fetchVmDetails, vmAliases, fallbackVmDetails } from "@/lib/component-utils/vmApiUtils";
 import { fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
+import { isServerUp } from "@/lib/component-utils/pingUtils";
 
 export default function VMDashboard() {
+
+  // Message Center state vars
+  const [message, setMessage] = useState<string | null>("Nothing to show!");
+  const [isMessageCenterVisible, setIsMessageCenterVisible] = useState(false);
 
   // User IP state vars
   const [ip, setIp] = useState<string | null>(null);
@@ -122,16 +127,38 @@ export default function VMDashboard() {
   };
 
   useEffect(() => {
-    setIsVmInfoFetching(true);
-
-    fetchVmDetails()
-        .then((vmDetails) => setDetails(vmDetails))
-        .catch((error) => console.error("Error fetching VM details:", error))
-        .finally(() => setIsVmInfoFetching(false));
+    fetchData();
   }, []);
 
+  const fetchData = async () => {
+    setIsVmInfoFetching(true);
+    setIsMessageCenterVisible(true);
+    setMessage("Checking API server availability...");
+
+    const serverIsUp = await isServerUp();
+
+    if (!serverIsUp) {
+      setMessage("It seems that the API server is down. Falling back to hardcoded values (on GCP we were utilising the free trial which might have finished if you're seeing this)");
+      setDetails(fallbackVmDetails);
+      setIsVmInfoFetching(false);
+      return;
+    }
+
+    setMessage("API server is up. Fetching VM details...");
+
+    try {
+      const vmDetails = await fetchVmDetails();
+      setDetails(vmDetails);
+      setMessage("VM details fetched successfully");
+    } catch (error: any) {
+      setMessage("Failed to fetch VM details");
+    } finally {
+      setIsVmInfoFetching(false);
+    }
+  };
+
   useEffect(() => {
-    if (!details["Public IP"]) return; // Ensure address exists before calling fetchMotd
+    if (!details["Public IP"] || details["Public IP"] === "N.A") return; // Ensure address exists and is not "NA" before calling fetchMotd. Its just a random fallback value.
 
     setIsMotdFetching(true);
 
@@ -140,8 +167,7 @@ export default function VMDashboard() {
         .catch((error) => console.error("Error fetching MOTD:", error))
         .finally(() => setIsMotdFetching(false));
   }, [details]);
-
-
+  
   const {
     variant,
     bg,
@@ -160,6 +186,7 @@ export default function VMDashboard() {
         setFetchFailed(false); // Ensure failure flag is reset
       } catch (error) {
         console.error("Failed to fetch IP:", error);
+        setMessage("Failed to fetch your IP address. Please try again later.");
         setFetchFailed(true);
       } finally {
         setIsFetching(false); // Always stop fetching
@@ -273,15 +300,26 @@ export default function VMDashboard() {
             isLoading={isMotdFetching}
           />
         </Tabs>
-        <div className="mt-6">
-          <>
-            {fetchFailed && (
-              <p className="text-red-400 text-sm mt-4">
-                Failed to fetch IP. Please reload the page.
-              </p>
+            {isMessageCenterVisible && (
+            <div className="mt-6 rounded-xl border bg-card text-card-foreground p-6">
+              <>
+              <h3 className="text-2xl font-semibold leading-none tracking-tight mb-10">
+                Message Center
+              </h3>
+              <p className="text-gray-600 text-sm mt-4">{message}</p>
+              </>
+            </div>
             )}
-          </>
-        </div>
+            <div className="mt-6 text-center text-xs">
+              <a
+                href="https://github.com/apparentlyarhm/minecraft-vm-management-console"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                View this project on GitHub
+              </a>
+            </div>
       </main>
     </div>
   );

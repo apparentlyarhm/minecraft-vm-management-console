@@ -6,6 +6,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const API_ENDPOINTS = {
   IP: `${BASE_URL}/api/v2/firewall/add-ip`,
+  PING: `${BASE_URL}/api/v2/ping`,
   FIREWALL: `${BASE_URL}/api/v2/firewall`,
   MACHINE: `${BASE_URL}/api/v2/machine`,
   MOTD: `${BASE_URL}/api/v2/server-info`,

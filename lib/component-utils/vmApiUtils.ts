@@ -29,10 +29,26 @@ export const vmAliases: Record<string, string> = {
   diskGb: "Total Disk Size (GB)",
 };
 
+export const fallbackVmDetails: Record<string, string | number> = Object.entries({
+  instanceName: "Unknown",
+  instanceZone: "Unknown",
+  machineType: "Unknown",
+  instanceId: "Unknown",
+  status: "PROVISIONING",
+  creationTimestamp: "Unknown",
+  publicIp: "N.A",
+  cpuPlatform: "Unknown",
+  cpuCores: 0,
+  memoryMb: 0,
+  diskGb: 0,
+}).reduce((acc, [key, value]) => {
+  acc[vmAliases[key] || key] = value;
+  return acc;
+}, {} as Record<string, string | number>);
+
 export const fetchVmDetails = async (): Promise<
   Record<string, string | number>
 > => {
-  try {
     const response = await fetch(API_ENDPOINTS.MACHINE);
     if (!response.ok) {
       throw new Error("Failed to fetch VM details");
@@ -47,8 +63,4 @@ export const fetchVmDetails = async (): Promise<
     });
 
     return transformedData;
-  } catch (error) {
-    console.error("Error fetching VM details:", error);
-    return {};
-  }
 };

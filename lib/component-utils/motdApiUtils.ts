@@ -33,7 +33,6 @@ export const MOTDAliases: Record<string, string> = {
 export const fetchMotd = async (
   address: string
 ): Promise<Record<string, string | number | string[]>> => {
-  try {
     const url = `${API_ENDPOINTS.MOTD}?address=${encodeURIComponent(address)}`;
     const response = await fetch(url);
     if (!response.ok) {
@@ -47,8 +46,4 @@ export const fetchMotd = async (
       transformedData[MOTDAliases[key] || key] = value;
     });
     return transformedData;
-  } catch (error) {
-    console.error("Error fetching server MOTD:", error);
-    return {};
-  }
 };
