@@ -150,7 +150,10 @@ export default function VMDashboard() {
       const vmDetails = await fetchVmDetails();
       setDetails(vmDetails);
       setMessage("VM details fetched successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error fetching VM details:", error.message);
+      }
       setMessage("Failed to fetch VM details");
     } finally {
       setIsVmInfoFetching(false);
