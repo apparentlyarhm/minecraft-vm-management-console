@@ -305,12 +305,12 @@ export default function VMDashboard() {
         </Tabs>
             {isMessageCenterVisible && (
             <div className="mt-6 rounded-xl border bg-card text-card-foreground p-6">
-              <>
               <h3 className="text-2xl font-semibold leading-none tracking-tight mb-10">
-                Message Center
+              Message Center
               </h3>
-              <p className="text-gray-600 text-sm mt-4">{message}</p>
-              </>
+              <code className="block p-4 bg-gray-50 text-sm max-w-[350px] rounded-lg text-gray-800">
+               {message}
+              </code>
             </div>
             )}
             <div className="mt-6 text-center text-xs">
