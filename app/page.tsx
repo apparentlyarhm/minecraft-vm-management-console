@@ -138,7 +138,7 @@ export default function VMDashboard() {
     const serverIsUp = await isServerUp();
 
     if (!serverIsUp) {
-      setMessage("It seems that the API server is down. Falling back to hardcoded values (on GCP we were utilising the free trial which might have finished if you're seeing this)");
+      setMessage("The API server appears to be unavailable. Using fallback values as the GCP free trial may have expired. The server Query will not be available until the API server is back up.");
       setDetails(fallbackVmDetails);
       setIsVmInfoFetching(false);
       return;
@@ -277,27 +277,28 @@ export default function VMDashboard() {
           <TabsList className="grid grid-cols-7 w-full">
             {tabs.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
-                key={value}
-                value={value}
-                className="flex items-center gap-2"
+          key={value}
+          value={value}
+          className="flex items-center gap-2"
               >
-                <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{label}</span>
+          <Icon className="h-4 w-4" />
+          <span className="hidden sm:inline">{label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
           <GenericDetailsTab
             value="details"
             title="Instance Details"
-            description="The instance details. This running however, does not guaratee that the server is up. Check MOTD."
+            description="The instance details. This running however, does not guarantee that the server is up. Check MOTD."
             detailsMap={details}
             aliases={vmAliases}
             isLoading={isVmInfoFetching}
           />
           <GenericDetailsTab
             value="MOTD"
-            title="MOTD"
-            description="Message-of-the-day. This is directly queried from the server. Presence of this indicates that the server is UP."
+            title="Server Query"
+            description="Query the server for information such as player count, server name, and more. This is a better indicator of server status than the instance status."
+            help="The Minecraft Query Protocol is used to retrieve server information such as the Message of the Day (MOTD), player count, and other metadata. It operates over UDP and requires the server to have query enabled in the server.properties. Low level handshakes are used to establish a connection and retrieve data, and has to be written in a specific format. This is not the same as the RCON protocol, which is used for remote console access."
             detailsMap={motdDetails}
             aliases={MOTDAliases}
             isLoading={isMotdFetching}
@@ -308,7 +309,7 @@ export default function VMDashboard() {
               <h3 className="text-2xl font-semibold leading-none tracking-tight mb-10">
               Message Center
               </h3>
-              <code className="block p-4 bg-gray-50 text-sm max-w-[350px] rounded-lg text-gray-800">
+              <code className="block p-4 bg-gray-50 text-sm rounded-lg text-gray-800">
                {message}
               </code>
             </div>

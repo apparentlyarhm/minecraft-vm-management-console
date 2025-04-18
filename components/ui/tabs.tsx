@@ -10,6 +10,7 @@ import {
 import Spinner from "@/components/ui/Spinner";
 
 import { cn } from "@/lib/utils";
+import { ShieldQuestion } from "lucide-react";
 
 const Tabs = TabsPrimitive.Root;
 
@@ -64,6 +65,7 @@ const GenericDetailsTab = ({
   detailsMap,
   aliases = {},
   isLoading,
+  help,
 }: {
   value: string;
   title: string;
@@ -71,12 +73,26 @@ const GenericDetailsTab = ({
   detailsMap: Record<string, string | number | string[]>;
   aliases?: Record<string, string>;
   isLoading: boolean;
+  help?: string;
 }) => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
   return (
     <TabsContent value={value} className="space-y-4 pt-4">
       <Card className="min-h-[400px]">
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle>{title}</CardTitle>
+            {help && (
+                <button
+                onClick={() => setIsModalOpen(true)}
+                className="text-muted-foreground hover:text-foreground focus:outline-none"
+                aria-label="Help"
+                >
+                <ShieldQuestion className="w-5 h-5" />
+                </button>
+            )}
+          </div>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -109,6 +125,23 @@ const GenericDetailsTab = ({
           )}
         </CardContent>
       </Card>
+
+      {help && isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-lg font-bold mb-4">Help</h2>
+            <p className="text-sm text-muted-foreground">{help}</p>
+            <div className="mt-10 flex justify-end">
+                <button
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 bg-muted text-sm rounded hover:bg-black hover:text-white focus:outline-none"
+                >
+              Close
+                </button>
+            </div>
+          </div>
+        </div>
+      )}
     </TabsContent>
   );
 };
