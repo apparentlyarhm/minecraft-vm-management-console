@@ -20,6 +20,8 @@ import {
   CircleCheck,
   CircleAlert,
   XCircle,
+  CloudUpload,
+  GitPullRequestArrow
 } from "lucide-react";
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
@@ -27,6 +29,7 @@ import { tabs } from "@/lib/config/tabsConfig";
 import { fetchVmDetails, vmAliases, fallbackVmDetails } from "@/lib/component-utils/vmApiUtils";
 import { fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
 import { isServerUp } from "@/lib/component-utils/pingUtils";
+import TopBar from "@/components/ui/topbar";
 
 export default function VMDashboard() {
 
@@ -140,6 +143,7 @@ export default function VMDashboard() {
     if (!serverIsUp) {
       setMessage("The API server appears to be unavailable. Using fallback values as the GCP free trial may have expired. The server Query will not be available until the API server is back up.");
       setDetails(fallbackVmDetails);
+      setFetchFailed(true);
       setIsVmInfoFetching(false);
       return;
     }
@@ -200,29 +204,29 @@ export default function VMDashboard() {
   }, []); // Runs only on mount
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="min-h-screen bg-white">
       {/* Main content */}
+        <TopBar items={[
+          <a href="https://github.com/apparentlyarhm/minecraft-vm-management-console" target="_blank" rel="noopener noreferrer">
+            <GitPullRequestArrow className="h-4 w-4" />
+          </a>,
+          details["Instance ID"], 
+          ip ? ip : "Fetching..."]} />
       <main className="container mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-semibold">Instance &#34;{VmName}&#34;</h1>
-            <p className="text-sm text-muted-foreground">
-              ID: {details["Instance ID"]}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Your IPv4 address: {ip ? ip : "Fetching..."}
-            </p>
+            <h1 className="text-md md:text-2xl font-semibold">Instance &#34;{VmName}&#34;</h1>
           </div>
-          {/* <Button
+          <Button
             variant="outline"
             onClick={handleIpAdd}
-            size="lg"
             icon={CloudUpload}
-            iconPosition="right"
-            disabled={isFetching || fetchFailed || isVmInfoFetching} // ✅ Disabled while fetching or if failed
+            iconPosition="left"
+            disabled={isFetching || fetchFailed || isVmInfoFetching} // TODO: improve these booleans. i believe that there are better ways to do this.
+            className="mt-4 md:mt-0"
           >
-            <p className="font-ember">Add your IP</p>
-          </Button> */}
+            <p className="font-ember mx-4 text-xs md:text-sm">Whitelist your IP</p>
+          </Button>
         </div>
 
         {/* Status card */}
@@ -314,16 +318,6 @@ export default function VMDashboard() {
               </code>
             </div>
             )}
-            <div className="mt-6 text-center text-xs">
-              <a
-                href="https://github.com/apparentlyarhm/minecraft-vm-management-console"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                View this project on GitHub
-              </a>
-            </div>
       </main>
     </div>
   );
