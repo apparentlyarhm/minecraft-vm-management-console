@@ -206,16 +206,18 @@ export default function VMDashboard() {
   return (
     <div className="min-h-screen bg-white">
       {/* Main content */}
-        <TopBar items={[
-          <a href="https://github.com/apparentlyarhm/minecraft-vm-management-console" target="_blank" rel="noopener noreferrer">
+        <TopBar items={
+          [
+          <a key="github-link" href="https://github.com/apparentlyarhm/minecraft-vm-management-console" target="_blank" rel="noopener noreferrer">
             <GitPullRequestArrow className="h-4 w-4" />
           </a>,
-          details["Instance ID"], 
-          ip ? ip : "Fetching..."]} />
+          <span key="instance-id">{details["Instance ID"]}</span>, 
+          <span key="ip-address">{ip ? ip : "Fetching..."}</span>] // I am not really sure why key is needed here. the linter fails without it, but run dev works without it.
+          } />
       <main className="container mx-auto py-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
-            <h1 className="text-md md:text-2xl font-semibold">Instance &#34;{VmName}&#34;</h1>
+            <h1 className="text-md md:text-2xl font-semibold">VM Instance &#34;{VmName}&#34;</h1>
           </div>
           <Button
             variant="outline"
@@ -225,7 +227,7 @@ export default function VMDashboard() {
             disabled={isFetching || fetchFailed || isVmInfoFetching} // TODO: improve these booleans. i believe that there are better ways to do this.
             className="mt-4 md:mt-0"
           >
-            <p className="font-ember mx-4 text-xs md:text-sm">Whitelist your IP</p>
+            <p className="font-ember mx-4 text-xs md:text-sm">Whitelist : {ip}</p>
           </Button>
         </div>
 
