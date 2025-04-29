@@ -30,17 +30,17 @@ export const vmAliases: Record<string, string> = {
 };
 
 export const fallbackVmDetails: Record<string, string | number> = Object.entries({
-  instanceName: "Unknown",
-  instanceZone: "Unknown",
-  machineType: "Unknown",
-  instanceId: "Unknown",
+  instanceName: "vm-sample",
+  instanceZone: "asia-south1-a",
+  machineType: "n1-sample-type",
+  instanceId: "11222333-sample-id",
   status: "PROVISIONING",
   creationTimestamp: "Unknown",
   publicIp: "N.A",
   cpuPlatform: "Unknown",
-  cpuCores: 0,
-  memoryMb: 0,
-  diskGb: 0,
+  cpuCores: 4,
+  memoryMb: 4096,
+  diskGb: 10,
 }).reduce((acc, [key, value]) => {
   acc[vmAliases[key] || key] = value;
   return acc;

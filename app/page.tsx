@@ -20,8 +20,8 @@ import {
   CircleCheck,
   CircleAlert,
   XCircle,
-  CloudUpload,
-  GitPullRequestArrow
+  GitPullRequestArrow,
+  ArrowDown
 } from "lucide-react";
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
@@ -216,19 +216,42 @@ export default function VMDashboard() {
           } />
       <main className="container mx-auto py-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <div>
-            <h1 className="text-md md:text-2xl font-semibold">VM Instance &#34;{VmName}&#34;</h1>
+          <div className="flex-1">
+            <h1 className="text-md md:text-2xl font-semibold">{VmName}</h1>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleIpAdd}
-            icon={CloudUpload}
-            iconPosition="left"
-            disabled={isFetching || fetchFailed || isVmInfoFetching} // TODO: improve these booleans. i believe that there are better ways to do this.
-            className="mt-4 md:mt-0"
-          >
-            <p className="font-ember mx-4 text-xs md:text-sm">Whitelist : {ip}</p>
-          </Button>
+          <div className="flex gap-4 mt-4 md:mt-0">
+            <Button
+              variant="outline"
+              onClick={handleIpAdd}
+              disabled={isFetching || fetchFailed || isVmInfoFetching}
+              className={`border-2 rounded-full ${
+              isFetching || fetchFailed || isVmInfoFetching
+                ? "border-gray-400"
+                : "border-sky-600"
+              }`}
+            >
+              <p
+              className={`font-ember mx-4 font-semibold text-xs md:text-sm ${
+                isFetching || fetchFailed || isVmInfoFetching
+                ? "text-gray-400"
+                : "text-sky-600"
+              }`}
+              >
+              Whitelist: {ip}
+              </p>
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={handleIpAdd}
+              disabled={true}
+              className="border-2 rounded-full border-gray-400"
+            >
+              <p className="font-ember text-gray-400 mx-4 font-semibold text-xs md:text-sm">
+              Remove: {ip}
+              </p>
+            </Button>
+          </div>
         </div>
 
         {/* Status card */}
