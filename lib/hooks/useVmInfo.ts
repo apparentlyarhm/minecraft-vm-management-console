@@ -37,8 +37,8 @@ export const useVmInfo = (userIp: string | null) => {
 
         const vm = await fetchVmDetails();
         setDetails(vm);
-      } catch (e: any) {
-        console.error("Error fetching VM details:", e.message);
+      } catch (err) {
+        console.error("Error fetching VM details:", err);
       } finally {
         setIsFetching(false);
       }
