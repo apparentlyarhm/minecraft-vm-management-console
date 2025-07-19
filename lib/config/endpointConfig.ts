@@ -6,10 +6,13 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const API_ENDPOINTS = {
   IP: `${BASE_URL}/api/v2/firewall/add-ip`,
+  CHECK_IP: `${BASE_URL}/api/v2/firewall/check-ip`,
   PING: `${BASE_URL}/api/v2/ping`,
+  PURGE: `${BASE_URL}/api/v2/firewall/purge`,
   FIREWALL: `${BASE_URL}/api/v2/firewall`,
   MACHINE: `${BASE_URL}/api/v2/machine`,
   MOTD: `${BASE_URL}/api/v2/server-info`,
+  LOGIN: `${BASE_URL}/api/v2/auth/login`,
 };
 
 export default API_ENDPOINTS;

@@ -21,7 +21,8 @@ import {
   CircleAlert,
   XCircle,
   GitPullRequestArrow,
-  ArrowDown
+  ArrowDown,
+  CircleAlertIcon
 } from "lucide-react";
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
@@ -30,12 +31,15 @@ import { fetchVmDetails, vmAliases, fallbackVmDetails } from "@/lib/component-ut
 import { fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
 import { isServerUp } from "@/lib/component-utils/pingUtils";
 import TopBar from "@/components/ui/topbar";
+import { addIpToFirewall, checkIpInFirewall, purgeFirewall } from "@/lib/component-utils/firewallUtils";
+import { initiateLogin } from "@/lib/component-utils/loginUtils";
 
 export default function VMDashboard() {
 
-  // Message Center state vars
-  const [message, setMessage] = useState<string | null>("Nothing to show!");
-  const [isMessageCenterVisible, setIsMessageCenterVisible] = useState(false);
+  const [isIpPresent, setIsIpPresent] = useState(false)
+
+  // logged in user
+  const [loggedInUser, setLoggedInUser] = useState<string>("Not Logged in")
 
   // User IP state vars
   const [ip, setIp] = useState<string | null>(null);
@@ -59,35 +63,38 @@ export default function VMDashboard() {
   const VmName = isVmInfoFetching ? "fetching.." : details["Instance Name"];
 
   const handleIpAdd = async () => {
+
     info({
       heading: "Request sent",
       message: "IP will be added",
       duration: 2000,
     });
 
-    setTimeout(() => {
-      const isSuccess = Math.random() > 0.5; // 50% chance of success or failure
+    if (ip != null) {
+      addIpToFirewall({ address: ip, passcode: "test" })
+        .then((message) => {
+          success({
+            heading: "Done!",
+            message: "IP whitelisted successfully",
+            duration: 3000,
+          });
+          setIsIpPresent(true);
+        })
+        .catch((e) =>
+          error({
+            heading: "Something went wrong",
+            message: `${e}`,
+            duration: 3000,
+          })
+        );
 
-      if (isSuccess) {
-        success({
-          heading: "Success",
-          message: "IP added successfully!",
-          duration: 3000,
-        });
-      } else {
-        error({
-          heading: "Failed",
-          message: "Failed to add IP. Please try again.",
-          duration: 3000,
-        });
-      }
-    }, 2500);
-  };
-
+    };
+  }
   const handleIpCopy = async () => {
     try {
       console.log("inside copy");
       await navigator.clipboard.writeText(details["Public IP"] as string);
+
       success({
         heading: "Copied!",
         message: "Public IPv4 address copied to clipboard.",
@@ -98,14 +105,49 @@ export default function VMDashboard() {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
+
       error({
         heading: "Copy Failed",
         message: "Could not copy the IP address. Please try again.",
         duration: 3000,
       });
+
     }
   };
 
+
+  const handlePurge = async () => {
+    const token = localStorage.getItem("app_token");
+
+    if (!token) {
+      console.log("No token found. Initiating login.");
+      await initiateLogin();
+      return;
+    }
+
+    try {
+      console.log("Token found. Attempting to purge firewall.");
+      
+      purgeFirewall(token)
+        .then((message) => success({
+          heading: "Purged",
+          message: "All whitelisted IPs cleared!",
+          duration: 3000,
+        }
+        ))
+        .catch((err) => error({
+          heading: "Failed to purge",
+          message: `${err}`,
+          duration: 6000,
+        }))
+
+    } catch (e) {
+      const err = e as Error;
+      if (!err.message.includes('Unauthorized')) {
+      }
+    } finally {
+    }
+  };
   const getStatusStyles = (status: string) => {
     switch (status) {
       case "RUNNING":
@@ -135,30 +177,30 @@ export default function VMDashboard() {
 
   const fetchData = async () => {
     setIsVmInfoFetching(true);
-    setIsMessageCenterVisible(true);
-    setMessage("Checking API server availability...");
-
+    console.log("inside vm fetch data")
     const serverIsUp = await isServerUp();
 
     if (!serverIsUp) {
-      setMessage("The API server appears to be unavailable. Using fallback values as the GCP free trial may have expired. The server Query will not be available until the API server is back up.");
       setDetails(fallbackVmDetails);
+      error({
+        heading: "Server Health Check failed",
+        message: "The information server could not be reached. It is possible that the service is unavailable. Values are fallback here and most features are disabled.",
+        duration: 6000,
+      });
+
       setFetchFailed(true);
       setIsVmInfoFetching(false);
       return;
     }
 
-    setMessage("API server is up. Fetching VM details...");
 
     try {
       const vmDetails = await fetchVmDetails();
       setDetails(vmDetails);
-      setMessage("VM details fetched successfully");
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Error fetching VM details:", error.message);
       }
-      setMessage("Failed to fetch VM details");
     } finally {
       setIsVmInfoFetching(false);
     }
@@ -170,85 +212,105 @@ export default function VMDashboard() {
     setIsMotdFetching(true);
 
     fetchMotd(details["Public IP"] as string)
-        .then((motd) => setMotdDetails(motd))
-        .catch((error) => console.error("Error fetching MOTD:", error))
-        .finally(() => setIsMotdFetching(false));
+      .then((motd) => setMotdDetails(motd))
+      .catch((error) => console.error("Error fetching MOTD:", error))
+      .finally(() => setIsMotdFetching(false));
   }, [details]);
-  
-  const {
-    variant,
-    bg,
-    icon: Icon,
-  } = getStatusStyles(details["Status"] as string);
+
+  const { variant, bg, icon: Icon, } = getStatusStyles(details["Status"] as string);
 
   useEffect(() => {
-    const fetchIP = async () => {
+    const fetchAndCheckIP = async () => {
+      console.log("fetch ip");
       try {
-        const response = await fetch("https://api.ipify.org?format=json");
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        const user = localStorage.getItem("id")
+        const token = localStorage.getItem("app_token")
+
+        if (user && token && user != "" && token != "") {
+          setLoggedInUser(user)
         }
+
+        const response = await fetch("https://api.ipify.org?format=json");
         const data = await response.json();
-        setIp(data.ip);
-        setFetchFailed(false); // Ensure failure flag is reset
-      } catch (error) {
-        console.error("Failed to fetch IP:", error);
-        setMessage("Failed to fetch your IP address. Please try again later.");
+
+        setIp(data.ip); // For UI
+        setFetchFailed(false);
+
+        // Now check firewall status with the fetched IP directly
+        const result = await checkIpInFirewall(data.ip);
+        if (result.message === "PRESENT") {
+          setIsIpPresent(true);
+
+        } else {
+          setIsIpPresent(false);
+          info({
+            heading: "IP isn't whitelisted",
+            message: "You wont be able to connect to the server or see MOTD unless you whitelist yourself!",
+            duration: 3000,
+          })
+        }
+      } catch (e) {
+        error({
+          heading: "IP fetch failed",
+          message: "Could not determine user IP",
+          duration: 3000,
+        });
         setFetchFailed(true);
       } finally {
-        setIsFetching(false); // Always stop fetching
+        setIsFetching(false);
       }
     };
 
-    fetchIP();
-  }, []); // Runs only on mount
+    fetchAndCheckIP();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-white">
       {/* Main content */}
-        <TopBar items={
-          [
+      <TopBar items={
+        [
           <a key="github-link" href="https://github.com/apparentlyarhm/minecraft-vm-management-console" target="_blank" rel="noopener noreferrer">
             <GitPullRequestArrow className="h-4 w-4" />
           </a>,
-          <span key="instance-id">{details["Instance ID"]}</span>, 
-          <span key="ip-address">{ip ? ip : "Fetching..."}</span>] // I am not really sure why key is needed here. the linter fails without it, but run dev works without it.
-          } />
+          <span key="instance-id">{details["Instance ID"]}</span>,
+          <span key="ip-address">{ip ? ip : "Fetching..."}</span>,
+          <span key="user">{loggedInUser}</span>
+        ] // I am not really sure why key is needed here. the linter fails without it, but run dev works without it.
+      } />
       <main className="container mx-auto py-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div className="flex-1">
             <h1 className="text-md md:text-2xl font-semibold">{VmName}</h1>
           </div>
-          <div className="flex gap-4 mt-4 md:mt-0">
+          <div className="flex items-center gap-4 mt-4 md:mt-0">
             <Button
               variant="outline"
               onClick={handleIpAdd}
-              disabled={isFetching || fetchFailed || isVmInfoFetching}
-              className={`border-2 rounded-full ${
-              isFetching || fetchFailed || isVmInfoFetching
+              disabled={isFetching || fetchFailed || isVmInfoFetching || isIpPresent}
+              className={`border-2 rounded-full ${isFetching || fetchFailed || isVmInfoFetching
                 ? "border-gray-400"
                 : "border-sky-600"
-              }`}
+                }`}
             >
               <p
-              className={`font-ember mx-4 font-semibold text-xs md:text-sm ${
-                isFetching || fetchFailed || isVmInfoFetching
-                ? "text-gray-400"
-                : "text-sky-600"
-              }`}
+                className={`font-ember mx-4 font-semibold text-xs md:text-sm ${isFetching || fetchFailed || isVmInfoFetching
+                  ? "text-gray-400"
+                  : "text-sky-600"
+                  }`}
               >
-              Whitelist: {ip}
+                Whitelist: {ip}
               </p>
             </Button>
-
             <Button
               variant="outline"
-              onClick={handleIpAdd}
-              disabled={true}
-              className="border-2 rounded-full border-gray-400"
+              onClick={handlePurge}
+              className={`border-2 rounded-full hover:bg-red-50 border-red-500`}
             >
-              <p className="font-ember text-gray-400 mx-4 font-semibold text-xs md:text-sm">
-              Remove: {ip}
+              <p
+                className={`font-ember text-red-500 mx-4 font-semibold text-xs md:text-sm`}
+              >
+                Purge Firewall
               </p>
             </Button>
           </div>
@@ -292,9 +354,19 @@ export default function VMDashboard() {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      Instance type
+                      Whitelisting status
                     </h3>
-                    <p>{details["Instance Type"]}</p>
+                    {isIpPresent ? (
+                      <div className="flex items-center gap-2">
+                        <CircleCheck className="text-green-700 w-5 h-5" />
+                        <span className="text-green-800 text-sm italic">Your IP is whitelisted</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <CircleAlert className="text-blue-700 w-5 h-5" />
+                        <span className="text-blue-800 text-sm italic">Your IP is not whitelisted</span>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -306,12 +378,12 @@ export default function VMDashboard() {
           <TabsList className="grid grid-cols-7 w-full">
             {tabs.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
-          key={value}
-          value={value}
-          className="flex items-center gap-2"
+                key={value}
+                value={value}
+                className="flex items-center cursor-pointer gap-2"
               >
-          <Icon className="h-4 w-4" />
-          <span className="hidden sm:inline">{label}</span>
+                <Icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -333,16 +405,6 @@ export default function VMDashboard() {
             isLoading={isMotdFetching}
           />
         </Tabs>
-            {isMessageCenterVisible && (
-            <div className="mt-6 rounded-xl border bg-card text-card-foreground p-6">
-              <h3 className="text-2xl font-semibold leading-none tracking-tight mb-10">
-              Message Center
-              </h3>
-              <code className="block p-4 bg-gray-50 text-sm rounded-lg text-gray-800">
-               {message}
-              </code>
-            </div>
-            )}
       </main>
     </div>
   );

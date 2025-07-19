@@ -4,6 +4,8 @@ const isProd = process.env.NODE_ENV === "production";
 const nextConfig: NextConfig = {
   basePath: isProd ? "/minecraft-vm-management-console" : "",
   assetPrefix: isProd ? "/minecraft-vm-management-console/" : "",
+  reactStrictMode: false
 };
+
 
 export default nextConfig;
