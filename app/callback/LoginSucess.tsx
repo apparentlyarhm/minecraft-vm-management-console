@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "./LoadingSpinner";
+import { handleLoginCallback } from "@/lib/component-utils/loginUtils";
 
 export default function LoginSuccess() {
   const router = useRouter();
@@ -11,9 +12,9 @@ export default function LoginSuccess() {
   const [message, setMessage] = useState("Logging in...");
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const tempCode = searchParams.get("code");
 
-    if (!token) {
+    if (!tempCode) {
       setMessage("Invalid access. Redirecting to login...");
       setTimeout(() => {
         router.replace("/");
@@ -22,19 +23,11 @@ export default function LoginSuccess() {
     }
 
     try {
-      const payloadBase64 = token.split(".")[1];
-      const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
-      const payload = JSON.parse(payloadJson);
-      const sub: string = payload.sub || "";
-      let id = "";
-      if (sub.startsWith("github|")) {
-        id = sub.split("|")[1] || "";
-      }
-
-      localStorage.setItem("app_token", token);
-      if (id) {
-        localStorage.setItem("id", id);
-      }
+      handleLoginCallback(tempCode)
+      .then((res)=> {
+        localStorage.setItem("app_token", res.token)
+        localStorage.setItem("id", res.id)
+      })
 
       const timeout = setTimeout(() => {
         router.replace("/");

@@ -25,3 +25,32 @@ export async function initiateLogin(): Promise<void> {
     alert("Could not start the login process. Please try again.");
   }
 }
+
+interface CallbackResponse {
+  token: string;
+  email: string;
+  id: string;
+}
+
+export async function handleLoginCallback(code: string): Promise<CallbackResponse> {
+  try {
+    const res = await fetch(`${API_ENDPOINTS.CALLBACK}?code=${encodeURIComponent(code)}`, {
+      method: 'GET',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: 'Failed to fetch callback data' }));
+      throw new Error(err.message);
+    }
+
+    const data: CallbackResponse = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Login callback failed:", error);
+    alert("Could not complete the login process. Please try again.");
+    throw error;
+  }
+}

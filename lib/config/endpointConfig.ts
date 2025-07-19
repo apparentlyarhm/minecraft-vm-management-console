@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   MACHINE: `${BASE_URL}/api/v2/machine`,
   MOTD: `${BASE_URL}/api/v2/server-info`,
   LOGIN: `${BASE_URL}/api/v2/auth/login`,
+  CALLBACK: `${BASE_URL}/api/v2/auth/callback`,
 };
 
 export default API_ENDPOINTS;
