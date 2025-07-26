@@ -28,15 +28,22 @@ import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
 import { tabs } from "@/lib/config/tabsConfig";
 import { fetchVmDetails, vmAliases, fallbackVmDetails } from "@/lib/component-utils/vmApiUtils";
-import { fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
+import { fetchModList, fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
 import { isServerUp } from "@/lib/component-utils/pingUtils";
 import TopBar from "@/components/ui/topbar";
 import { addIpToFirewall, checkIpInFirewall, purgeFirewall } from "@/lib/component-utils/firewallUtils";
 import { initiateLogin } from "@/lib/component-utils/loginUtils";
+import { ModList } from "@/components/ui/mod-list";
 
 export default function VMDashboard() {
 
   const [isIpPresent, setIsIpPresent] = useState(false)
+
+  // Mod List state vars
+  const [modlist, setModList] = useState<string[]>([])
+  const [updatedAt, setUpdateAt] = useState<string>("")
+  const [modListFetchFailed, setModListFetchFailed] = useState(false)
+  const [modListFetching, setModListFetching] = useState(false)
 
   // logged in user
   const [loggedInUser, setLoggedInUser] = useState<string>("Not Logged in")
@@ -115,6 +122,24 @@ export default function VMDashboard() {
     }
   };
 
+  const fetchMods = async () => {
+    setModListFetching(true)
+
+    fetchModList()
+    .then(res => {
+      setModList(res.mods)
+      setUpdateAt(res.updatedAt)
+    })
+    .catch(e => {
+      error({
+          heading: "Failed to fetch Mod list",
+          message: `${e}`,
+          duration: 6000,
+        })
+        setModListFetching(false)
+    })
+    .finally(() => setModListFetching(false))
+  }
 
   const handlePurge = async () => {
     const token = localStorage.getItem("app_token");
@@ -127,7 +152,7 @@ export default function VMDashboard() {
 
     try {
       console.log("Token found. Attempting to purge firewall.");
-      
+
       purgeFirewall(token)
         .then((message) => success({
           heading: "Purged",
@@ -171,9 +196,13 @@ export default function VMDashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+useEffect(() => {
+  const run = async () => {
+    await fetchData();
+    await fetchMods();
+  };
+  run();
+}, []);
 
   const fetchData = async () => {
     setIsVmInfoFetching(true);
@@ -403,6 +432,14 @@ export default function VMDashboard() {
             detailsMap={motdDetails}
             aliases={MOTDAliases}
             isLoading={isMotdFetching}
+          />
+          <ModList
+            value="modlist"
+            updatedAt = {updatedAt}
+            title="Mod List"
+            description="The below list shows all current installed mods. Downloads are not supported yet."
+            items={modlist}
+            isLoading={false}
           />
         </Tabs>
       </main>

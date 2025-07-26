@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   MOTD: `${BASE_URL}/api/v2/server-info`,
   LOGIN: `${BASE_URL}/api/v2/auth/login`,
   CALLBACK: `${BASE_URL}/api/v2/auth/callback`,
+  MODS: `${BASE_URL}/api/v2/mods`,
 };
 
 export default API_ENDPOINTS;

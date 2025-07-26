@@ -15,6 +15,11 @@ export type MOTDResponse = {
   gameId: string;
 };
 
+export type ModsResponse = {
+  updatedAt: string
+  mods: string[]
+}
+
 export const MOTDAliases: Record<string, string> = {
   hostname: "Message of the day",
   hostIp: "string",
@@ -47,3 +52,14 @@ export const fetchMotd = async (
     });
     return transformedData;
 };
+
+
+export const fetchModList = async (): Promise<ModsResponse> => {
+    const response = await fetch(API_ENDPOINTS.MODS);
+    if (!response.ok) {
+      throw new Error("Failed to fetch ModList!");
+    }
+
+    const data: ModsResponse = await response.json()
+    return data;
+}

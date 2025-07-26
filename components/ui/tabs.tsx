@@ -84,13 +84,13 @@ const GenericDetailsTab = ({
           <div className="flex items-center gap-2">
             <CardTitle>{title}</CardTitle>
             {help && (
-                <button
+              <button
                 onClick={() => setIsModalOpen(true)}
                 className="text-muted-foreground hover:text-foreground focus:outline-none"
                 aria-label="Help"
-                >
+              >
                 <ShieldQuestion className="w-5 h-5" />
-                </button>
+              </button>
             )}
           </div>
           <CardDescription>{description}</CardDescription>
@@ -132,12 +132,12 @@ const GenericDetailsTab = ({
             <h2 className="text-lg font-bold mb-4">Help</h2>
             <p className="text-sm text-muted-foreground">{help}</p>
             <div className="mt-10 flex justify-end">
-                <button
-              onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 bg-muted text-sm rounded hover:bg-black hover:text-white focus:outline-none"
-                >
-              Close
-                </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-muted text-sm rounded hover:bg-black hover:text-white focus:outline-none"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
