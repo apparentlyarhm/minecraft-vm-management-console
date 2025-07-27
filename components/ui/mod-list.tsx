@@ -7,35 +7,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Copy, Download, ShieldQuestion } from "lucide-react";
+import { Download, ShieldQuestion } from "lucide-react";
 import Spinner from "./Spinner";
-
-
-function getRelativeTime(timestamp: string): string {
-    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-    const now = new Date();
-    const updated = new Date(timestamp);
-    const diff = (updated.getTime() - now.getTime()) / 1000; // in seconds
-
-    const ranges: [number, Intl.RelativeTimeFormatUnit][] = [
-        [60, "second"],
-        [60 * 60, "minute"],
-        [60 * 60 * 24, "hour"],
-        [60 * 60 * 24 * 7, "day"],
-        [60 * 60 * 24 * 30, "week"],
-        [60 * 60 * 24 * 365, "month"],
-        [Infinity, "year"],
-    ];
-
-    for (const [rangeInSeconds, unit] of ranges) {
-        if (Math.abs(diff) < rangeInSeconds) {
-            const divisor = rangeInSeconds / (unit === "second" ? 1 : 60);
-            return rtf.format(Math.round(diff / divisor), unit);
-        }
-    }
-
-    return rtf.format(Math.round(diff / (60 * 60 * 24 * 365)), "year");
-}
 
 
 const ModList = ({
@@ -56,6 +29,8 @@ const ModList = ({
     updatedAt?: string
 }) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [expanded, setExpanded] = React.useState(false)
+    const dataForDisplay = expanded ? items : items.slice(0, 10)
 
     return (
         <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
@@ -75,9 +50,9 @@ const ModList = ({
                     </div>
                     <CardDescription>{description}</CardDescription>
 
-                    {updatedAt &&  (
-                        <p className="text-xs text-muted-foreground mt-1 italic">
-                            Last updated: {getRelativeTime(updatedAt)}
+                    {updatedAt && (
+                        <p className="text-sm font-bold text-green-800 mt-1">
+                            Last updated: {new Date(updatedAt).toUTCString()} | Current UTC: {new Date().toUTCString()}
                         </p>
                     )}
 
@@ -85,11 +60,11 @@ const ModList = ({
                 <CardContent>
                     {isLoading ? (
                         <Spinner />
-                    ) : items.length === 0 ? (
+                    ) : dataForDisplay.length === 0 ? (
                         <p className="text-sm italic text-muted-foreground">No items found.</p>
                     ) : (
                         <div className="flex flex-col gap-2">
-                            {items.map((item, idx) => (
+                            {dataForDisplay.map((item, idx) => (
                                 <div
                                     key={`${item}-${idx}`}
                                     onClick={() => alert("Upcoming feature!")}
@@ -106,6 +81,9 @@ const ModList = ({
                                     </div>
                                 </div>
                             ))}
+                            <button className="text-sm text-muted-foreground hover:text-gray-900 cursor-pointer" type="button" onClick={() => setExpanded(!expanded)}>
+                                {expanded ? 'Show Less' : `Show all ${items.length} items`}
+                            </button>
                         </div>
                     )}
                 </CardContent>
