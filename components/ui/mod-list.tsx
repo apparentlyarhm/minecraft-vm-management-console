@@ -64,27 +64,32 @@ const ModList = ({
                         <p className="text-sm italic text-muted-foreground">No items found.</p>
                     ) : (
                         <div className="flex flex-col gap-2">
-                            {dataForDisplay.map((item, idx) => (
-                                <div
-                                    key={`${item}-${idx}`}
-                                    onClick={() => alert("Upcoming feature!")}
-                                    className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer border rounded-md"
-                                >
-                                    <span className="text-sm text-foreground break-all">{item}</span>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => alert("Upcoming feature!")}
-                                            className="text-muted-foreground hover:text-foreground"
-                                        >
-                                            <Download className="w-4 h-4" />
-                                        </button>
+                            <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+                                {dataForDisplay.map((item, idx) => (
+                                    <div
+                                        key={`${item}-${idx}`}
+                                        onClick={() => alert("Upcoming feature!")}
+                                        className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer border rounded-md"
+                                    >
+                                        <span className="text-sm text-foreground break-all">{item}</span>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => alert("Upcoming feature!")}
+                                                className="text-muted-foreground hover:text-foreground"
+                                            >
+                                                <Download className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                            <button className="text-sm text-muted-foreground hover:text-gray-900 cursor-pointer" type="button" onClick={() => setExpanded(!expanded)}>
-                                {expanded ? 'Show Less' : `Show all ${items.length} items`}
-                            </button>
+                                ))}
+                            </div>
+                            <div className="text-center">
+                                <button className="text-sm text-muted-foreground hover:text-gray-900 cursor-pointer" type="button" onClick={() => setExpanded(!expanded)}>
+                                    {expanded ? 'Show Less' : `Show all ${items.length} items`}
+                                </button>
+                            </div>
                         </div>
+                        
                     )}
                 </CardContent>
 
