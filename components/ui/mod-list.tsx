@@ -31,10 +31,34 @@ const ModList = ({
     updatedAt?: string
 }) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+
     const [confirmingFile, setConfirmingFile] = React.useState<string | null>(null);
+
+    const [search, setSearch] = React.useState('');
     const [expanded, setExpanded] = React.useState(false)
-    const dataForDisplay = expanded ? items : items.slice(0, 10)
-    const { success, error, info } = useToast();
+
+    const { error, info } = useToast();
+
+    const filteredItems = React.useMemo(() =>
+        items.filter(item =>
+            item.toLowerCase().includes(search.toLowerCase())
+        ), [items, search]);
+
+    const isViewingInitialList = search === '';
+
+    const visibleItems = React.useMemo(() => {
+        if (!isViewingInitialList) {
+            return filteredItems;
+        }
+
+        if (expanded) {
+            return filteredItems;
+        }
+
+        return filteredItems.slice(0, 10);
+    }, [isViewingInitialList, expanded, filteredItems]);
+
+    const canShowMore = isViewingInitialList && filteredItems.length > 10;
 
     return (
         <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
@@ -62,14 +86,25 @@ const ModList = ({
 
                 </CardHeader>
                 <CardContent>
+                    <input
+                        type="text"
+                        placeholder="Search mods..."
+                        value={search}
+                        onChange={e => {
+                            setSearch(e.target.value);
+                            setExpanded(false); // Reset expansion on new search
+                        }}
+                        className="border hover:bg-gray-50 focus:border-gray-600 hover:cursor-pointer p-6 text-sm rounded-3xl w-full mb-4"
+                    />
+
                     {isLoading ? (
                         <Spinner />
-                    ) : dataForDisplay.length === 0 ? (
+                    ) : visibleItems.length === 0 ? (
                         <p className="text-sm italic text-muted-foreground">No items found.</p>
                     ) : (
                         <div className="flex flex-col gap-2">
                             <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
-                                {dataForDisplay.map((item, idx) => (
+                                {visibleItems.map((item, idx) => (
                                     <div
                                         key={`${item}-${idx}`}
                                         onClick={() => setConfirmingFile(item)}
@@ -78,7 +113,7 @@ const ModList = ({
                                         <span className="text-sm text-foreground break-all">{item}</span>
                                         <div className="flex gap-2">
                                             <button
-                                                onClick={() => alert("Upcoming feature!")}
+                                                onClick={() => setConfirmingFile(item)}
                                                 className="text-muted-foreground hover:text-foreground"
                                             >
                                                 <Download className="w-4 h-4" />
@@ -87,11 +122,14 @@ const ModList = ({
                                     </div>
                                 ))}
                             </div>
-                            <div className="text-center">
-                                <button className="text-sm text-muted-foreground hover:text-gray-900 cursor-pointer" type="button" onClick={() => setExpanded(!expanded)}>
-                                    {expanded ? 'Show Less' : `Show all ${items.length} items`}
-                                </button>
-                            </div>
+
+                            {canShowMore && (
+                                <div className="text-center mt-2">
+                                    <button className="text-sm text-muted-foreground hover:text-gray-900 cursor-pointer" type="button" onClick={() => setExpanded(!expanded)}>
+                                        {expanded ? 'Show Less' : `Show all ${items.length} items`}
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                     )}
@@ -114,7 +152,7 @@ const ModList = ({
                                     a.click();
                                     document.body.removeChild(a);
 
-                                    success({
+                                    info({
                                         heading: "Download started",
                                         message: "Your download link is valid for 5 minutes.",
                                         duration: 4000
