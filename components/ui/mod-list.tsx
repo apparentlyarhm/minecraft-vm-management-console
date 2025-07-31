@@ -21,6 +21,7 @@ const ModList = ({
     updatedAt,
     isLoading,
     help,
+    didLoadingFail
 }: {
     value: string;
     title: string;
@@ -28,7 +29,8 @@ const ModList = ({
     items: string[];
     isLoading: boolean;
     help?: string;
-    updatedAt?: string
+    updatedAt?: string;
+    didLoadingFail: boolean
 }) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
 
@@ -78,60 +80,69 @@ const ModList = ({
                     </div>
                     <CardDescription>{description}</CardDescription>
 
-                    {updatedAt && (
-                        <p className="text-sm font-bold text-green-800 mt-1">
-                            Last updated: {new Date(updatedAt).toUTCString()} | Current UTC: {new Date().toUTCString()}
-                        </p>
-                    )}
+
 
                 </CardHeader>
                 <CardContent>
-                    <input
-                        type="text"
-                        placeholder="Search mods..."
-                        value={search}
-                        onChange={e => {
-                            setSearch(e.target.value);
-                            setExpanded(false); // Reset expansion on new search
-                        }}
-                        className="border hover:bg-gray-50 focus:border-gray-600 hover:cursor-pointer p-6 text-sm rounded-3xl w-full mb-4"
-                    />
 
-                    {isLoading ? (
-                        <Spinner />
-                    ) : visibleItems.length === 0 ? (
-                        <p className="text-sm italic text-muted-foreground">No items found.</p>
+                    {didLoadingFail ? (
+                        <p className="text-sm text-red-600 mt-1">
+                            Mod list fetch failed!
+                        </p>
                     ) : (
-                        <div className="flex flex-col gap-2">
-                            <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
-                                {visibleItems.map((item, idx) => (
-                                    <div
-                                        key={`${item}-${idx}`}
-                                        onClick={() => setConfirmingFile(item)}
-                                        className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer border rounded-md"
-                                    >
-                                        <span className="text-sm text-foreground break-all">{item}</span>
-                                        <div className="flex gap-2">
-                                            <button
+                        <div className="flex flex-col gap-7">
+                            {updatedAt && (
+                                <p className="text-sm font-bold text-green-800">
+                                    Last updated: {new Date(updatedAt).toUTCString()} | Current UTC: {new Date().toUTCString()}
+                                </p>
+                            )}
+                            <input
+                                type="text"
+                                placeholder="Search mods..."
+                                value={search}
+                                onChange={e => {
+                                    setSearch(e.target.value);
+                                    setExpanded(false); // Reset expansion on new search
+                                }}
+                                className="border hover:bg-gray-50 focus:border-gray-600 hover:cursor-pointer p-6 text-sm rounded-3xl w-full"
+                            />
+                            {isLoading ? (
+                                <Spinner />
+                            ) : visibleItems.length === 0 ? (
+                                <p className="text-sm italic text-muted-foreground">No items found.</p>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+                                        {visibleItems.map((item, idx) => (
+                                            <div
+                                                key={`${item}-${idx}`}
                                                 onClick={() => setConfirmingFile(item)}
-                                                className="text-muted-foreground hover:text-foreground"
+                                                className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer border rounded-md"
                                             >
-                                                <Download className="w-4 h-4" />
+                                                <span className="text-sm text-foreground break-all">{item}</span>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => setConfirmingFile(item)}
+                                                        className="text-muted-foreground hover:text-foreground"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {canShowMore && (
+                                        <div className="text-center mt-2">
+                                            <button className="text-sm text-muted-foreground hover:text-gray-900 cursor-pointer" type="button" onClick={() => setExpanded(!expanded)}>
+                                                {expanded ? 'Show Less' : `Show all ${items.length} items`}
                                             </button>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {canShowMore && (
-                                <div className="text-center mt-2">
-                                    <button className="text-sm text-muted-foreground hover:text-gray-900 cursor-pointer" type="button" onClick={() => setExpanded(!expanded)}>
-                                        {expanded ? 'Show Less' : `Show all ${items.length} items`}
-                                    </button>
+                                    )}
                                 </div>
+
                             )}
                         </div>
-
                     )}
                 </CardContent>
 

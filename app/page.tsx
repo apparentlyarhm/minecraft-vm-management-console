@@ -21,8 +21,9 @@ import {
   CircleAlert,
   XCircle,
   GitPullRequestArrow,
-  ArrowDown,
-  CircleAlertIcon
+  ShieldCheck,
+  Loader,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
@@ -38,6 +39,11 @@ import { ModList } from "@/components/ui/mod-list";
 export default function VMDashboard() {
 
   const [isIpPresent, setIsIpPresent] = useState(false)
+
+  // button states
+  const [isWhitelisting, setIsWhitelisting] = useState(false);
+  const [isPurging, setIsPurging] = useState(false);
+
 
   // Mod List state vars
   const [modlist, setModList] = useState<string[]>([])
@@ -71,6 +77,7 @@ export default function VMDashboard() {
 
   const handleIpAdd = async () => {
 
+    setIsWhitelisting(true);
     info({
       heading: "Request sent",
       message: "IP will be added",
@@ -93,13 +100,15 @@ export default function VMDashboard() {
             message: `${e}`,
             duration: 3000,
           })
-        );
+        )
+        .finally(() => {
+          setIsWhitelisting(false);
+        })
 
     };
   }
   const handleIpCopy = async () => {
     try {
-      console.log("inside copy");
       await navigator.clipboard.writeText(details["Public IP"] as string);
 
       success({
@@ -126,22 +135,28 @@ export default function VMDashboard() {
     setModListFetching(true)
 
     fetchModList()
-    .then(res => {
-      setModList(res.mods)
-      setUpdateAt(res.updatedAt)
-    })
-    .catch(e => {
-      error({
+      .then(res => {
+        setModList(res.mods)
+        setUpdateAt(res.updatedAt)
+      })
+      .catch(e => {
+        error({
           heading: "Failed to fetch Mod list",
           message: `${e}`,
           duration: 6000,
         })
+
         setModListFetching(false)
-    })
-    .finally(() => setModListFetching(false))
+        setModListFetchFailed(true)
+
+
+      })
+      .finally(() => setModListFetching(false))
   }
 
   const handlePurge = async () => {
+    setIsPurging(false)
+
     const token = localStorage.getItem("app_token");
 
     if (!token) {
@@ -165,6 +180,9 @@ export default function VMDashboard() {
           message: `${err}`,
           duration: 6000,
         }))
+        .finally(() => {
+          setIsPurging(false)
+        })
 
     } catch (e) {
       const err = e as Error;
@@ -196,13 +214,13 @@ export default function VMDashboard() {
     }
   };
 
-useEffect(() => {
-  const run = async () => {
-    await fetchData();
-    await fetchMods();
-  };
-  run();
-}, []);
+  useEffect(() => {
+    const run = async () => {
+      await fetchData();
+      await fetchMods();
+    };
+    run();
+  }, []);
 
   const fetchData = async () => {
     setIsVmInfoFetching(true);
@@ -316,33 +334,44 @@ useEffect(() => {
             <Button
               variant="outline"
               onClick={handleIpAdd}
-              disabled={isFetching || fetchFailed || isVmInfoFetching || isIpPresent}
+              disabled={isFetching || fetchFailed || isVmInfoFetching || isIpPresent || isWhitelisting}
               className={`border-2 rounded-full ${isFetching || fetchFailed || isVmInfoFetching
                 ? "border-gray-400"
                 : "border-sky-600"
                 }`}
             >
-              <p
-                className={`font-ember mx-4 font-semibold text-xs md:text-sm ${isFetching || fetchFailed || isVmInfoFetching
-                  ? "text-gray-400"
-                  : "text-sky-600"
-                  }`}
-              >
-                Whitelist: {ip}
-              </p>
+              {isWhitelisting ? (
+                <Loader className="animate-spin h-4 w-4 mx-4 text-sky-600" />
+              ) : (
+                <p
+                  className={`flex items-center gap-2 font-ember mx-4 font-semibold text-xs md:text-sm ${isFetching || fetchFailed || isVmInfoFetching
+                    ? "text-gray-400"
+                    : "text-sky-600"
+                    }`}
+                >
+                  Whitelist: {ip}
+                  <ShieldCheck className="w-4 h-4" />
+                </p>
+              )}
             </Button>
+
             <Button
               variant="outline"
               onClick={handlePurge}
-              className={`border-2 rounded-full hover:bg-red-50 border-red-500`}
+              disabled={isPurging}
+              className="border-2 rounded-full hover:bg-red-50 border-red-500"
             >
-              <p
-                className={`font-ember text-red-500 mx-4 font-semibold text-xs md:text-sm`}
-              >
-                Purge Firewall
-              </p>
+              {isPurging ? (
+                <Loader className="animate-spin h-4 w-4 mx-4 text-red-500" />
+              ) : (
+                <p className="flex items-center gap-2 font-ember text-red-500 mx-4 font-semibold text-xs md:text-sm">
+                  Purge Firewall
+                  <Trash2 className="w-4 h-4" />
+                </p>
+              )}
             </Button>
           </div>
+
         </div>
 
         {/* Status card */}
@@ -435,11 +464,12 @@ useEffect(() => {
           />
           <ModList
             value="modlist"
-            updatedAt = {updatedAt}
+            updatedAt={updatedAt}
             title="Mod List"
             description="The below list shows all current installed mods. Downloads are not supported yet."
             items={modlist}
-            isLoading={false}
+            isLoading={modListFetching}
+            didLoadingFail={modListFetchFailed}
           />
         </Tabs>
       </main>
