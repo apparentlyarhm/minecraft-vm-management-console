@@ -1,4 +1,4 @@
-name: Deploy Next.js site to Pages
+name: deploy this gay ass app to gh pages
 
 on:
   workflow_dispatch:
