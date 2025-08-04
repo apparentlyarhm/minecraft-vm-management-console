@@ -22,12 +22,10 @@ export type ModsResponse = {
 
 export const MOTDAliases: Record<string, string> = {
   hostname: "Message of the day",
-  hostIp: "string",
   plugins: "Plugins",
   numPlayers: "Number of players online",
   players: "Online players",
   gameType: "Game Type",
-  um: "what is this",
   maxPlayers: "Max Players",
   hostPort: "Server Port",
   version: "Minecraft Version",
@@ -35,18 +33,36 @@ export const MOTDAliases: Record<string, string> = {
   gameId: "Game ID",
 };
 
+export const fallbackMotd: Record<string, string | number | string[]> = {
+  "Message of the day": "Fallback Server",
+  Plugins: "Essentials, WorldEdit",
+  "Number of players online": 2,
+  "Online players": ["name1", "name2"],
+  "Game Type": "SMP",
+  "Max Players": 20,
+  "Server Port": 25565,
+  "Minecraft Version": "1.20.1",
+  "World Name": "world",
+  "Game ID": "MINECRAFT",
+};
+
 export const fetchMotd = async (
-  address: string
+  address: string,
+  isFallback: boolean
 ): Promise<Record<string, string | number | string[]>> => {
+  if (isFallback) {
+    return fallbackMotd;
+  }
+
   const url = `${API_ENDPOINTS.MOTD}?address=${encodeURIComponent(address)}`;
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error("Failed to fetch MOTD");
+    return fallbackMotd;
   }
+
   const data: MOTDResponse = await response.json();
 
   const transformedData: Record<string, string | number | string[]> = {};
-
   Object.entries(data).forEach(([key, value]) => {
     transformedData[MOTDAliases[key] || key] = value;
   });
@@ -54,7 +70,14 @@ export const fetchMotd = async (
 };
 
 
-export const fetchModList = async (): Promise<ModsResponse> => {
+export const fetchModList = async (isFallback: boolean): Promise<ModsResponse> => {
+  if (isFallback) {
+    return {
+      updatedAt: "N/A",
+      mods: ["FallbackMod1", "FallbackMod2"],
+    };
+  }
+
   const response = await fetch(API_ENDPOINTS.MODS);
   if (!response.ok) {
     throw new Error("Failed to fetch ModList!");

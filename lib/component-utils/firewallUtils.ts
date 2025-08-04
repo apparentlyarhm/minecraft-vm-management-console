@@ -26,7 +26,10 @@ export async function addIpToFirewall(
 }
 
 
-export async function checkIpInFirewall(ip: string): Promise<{ message: string }> {
+export async function checkIpInFirewall(ip: string, isFallback: boolean): Promise<{ message: string }> {
+  if (isFallback){
+    return {"message": "NOT_PRESENT"} // some string
+  }
   const res = await fetch(`${API_ENDPOINTS.CHECK_IP}?ip=${encodeURIComponent(ip)}`, {
     method: 'GET',
     headers: {

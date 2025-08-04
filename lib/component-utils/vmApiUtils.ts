@@ -46,21 +46,24 @@ export const fallbackVmDetails: Record<string, string | number> = Object.entries
   return acc;
 }, {} as Record<string, string | number>);
 
-export const fetchVmDetails = async (): Promise<
-  Record<string, string | number>
-> => {
-    const response = await fetch(API_ENDPOINTS.MACHINE);
-    if (!response.ok) {
-      throw new Error("Failed to fetch VM details");
-    }
+export const fetchVmDetails = async (
+  isFallback: boolean
+): Promise<Record<string, string | number>> => {
+  if (isFallback) {
+    return fallbackVmDetails;
+  }
 
-    const data: VmDetailsResponse = await response.json();
+  const response = await fetch(API_ENDPOINTS.MACHINE);
+  if (!response.ok) {
+    throw new Error("Failed to fetch VM details");
+  }
 
-    const transformedData: Record<string, string | number> = {};
+  const data: VmDetailsResponse = await response.json();
 
-    Object.entries(data).forEach(([key, value]) => {
-      transformedData[vmAliases[key] || key] = value;
-    });
+  const transformedData: Record<string, string | number> = {};
+  Object.entries(data).forEach(([key, value]) => {
+    transformedData[vmAliases[key] || key] = value;
+  });
 
-    return transformedData;
+  return transformedData;
 };

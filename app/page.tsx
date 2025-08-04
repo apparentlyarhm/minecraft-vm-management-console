@@ -35,8 +35,12 @@ import TopBar from "@/components/ui/topbar";
 import { addIpToFirewall, checkIpInFirewall, purgeFirewall } from "@/lib/component-utils/firewallUtils";
 import { initiateLogin } from "@/lib/component-utils/loginUtils";
 import { ModList } from "@/components/ui/mod-list";
+import { useFallbackMode } from "@/lib/AppWrapper";
+import FallbackBanner from "@/components/ui/fallback-card";
 
 export default function VMDashboard() {
+
+  const isFallback = useFallbackMode();
 
   const [isIpPresent, setIsIpPresent] = useState(false)
 
@@ -134,7 +138,7 @@ export default function VMDashboard() {
   const fetchMods = async () => {
     setModListFetching(true)
 
-    fetchModList()
+    fetchModList(isFallback)
       .then(res => {
         setModList(res.mods)
         setUpdateAt(res.updatedAt)
@@ -168,7 +172,7 @@ export default function VMDashboard() {
     try {
       console.log("Token found. Attempting to purge firewall.");
 
-      purgeFirewall(token)
+      purgeFirewall(token) // didnt add the isFallback here because the button will be disabled entirely
         .then((message) => success({
           heading: "Purged",
           message: "All whitelisted IPs cleared!",
@@ -225,24 +229,9 @@ export default function VMDashboard() {
   const fetchData = async () => {
     setIsVmInfoFetching(true);
     console.log("inside vm fetch data")
-    const serverIsUp = await isServerUp();
-
-    if (!serverIsUp) {
-      setDetails(fallbackVmDetails);
-      error({
-        heading: "Server Health Check failed",
-        message: "The information server could not be reached. It is possible that the service is unavailable. Values are fallback here and most features are disabled.",
-        duration: 6000,
-      });
-
-      setFetchFailed(true);
-      setIsVmInfoFetching(false);
-      return;
-    }
-
 
     try {
-      const vmDetails = await fetchVmDetails();
+      const vmDetails = await fetchVmDetails(isFallback);
       setDetails(vmDetails);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -254,11 +243,9 @@ export default function VMDashboard() {
   };
 
   useEffect(() => {
-    if (!details["Public IP"] || details["Public IP"] === "N.A") return; // Ensure address exists and is not "NA" before calling fetchMotd. Its just a random fallback value.
-
     setIsMotdFetching(true);
 
-    fetchMotd(details["Public IP"] as string)
+    fetchMotd(details["Public IP"] as string, isFallback)
       .then((motd) => setMotdDetails(motd))
       .catch((error) => console.error("Error fetching MOTD:", error))
       .finally(() => setIsMotdFetching(false));
@@ -284,7 +271,7 @@ export default function VMDashboard() {
         setFetchFailed(false);
 
         // Now check firewall status with the fetched IP directly
-        const result = await checkIpInFirewall(data.ip);
+        const result = await checkIpInFirewall(data.ip, isFallback);
         if (result.message === "PRESENT") {
           setIsIpPresent(true);
 
@@ -326,6 +313,7 @@ export default function VMDashboard() {
         ] // I am not really sure why key is needed here. the linter fails without it, but run dev works without it.
       } />
       <main className="container mx-auto py-6">
+        {isFallback && (<FallbackBanner />)}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div className="flex-1">
             <h1 className="text-md md:text-2xl font-semibold">{VmName}</h1>
@@ -334,7 +322,7 @@ export default function VMDashboard() {
             <Button
               variant="outline"
               onClick={handleIpAdd}
-              disabled={isFetching || fetchFailed || isVmInfoFetching || isIpPresent || isWhitelisting}
+              disabled={isFetching || fetchFailed || isVmInfoFetching || isIpPresent || isWhitelisting || isFallback}
               className={`border-2 rounded-full ${isFetching || fetchFailed || isVmInfoFetching
                 ? "border-gray-400"
                 : "border-sky-600"
@@ -358,7 +346,7 @@ export default function VMDashboard() {
             <Button
               variant="outline"
               onClick={handlePurge}
-              disabled={isPurging}
+              disabled={isPurging || isFallback}
               className="border-2 rounded-full hover:bg-red-50 border-red-500"
             >
               {isPurging ? (
@@ -463,10 +451,11 @@ export default function VMDashboard() {
             isLoading={isMotdFetching}
           />
           <ModList
+          isFallback={isFallback}
             value="modlist"
             updatedAt={updatedAt}
-            title="Mod List"
-            description="The below list shows all current installed mods. Downloads are not supported yet."
+            title={isFallback ? "Mod List (sample)" : "Mod List"}
+            description="The below list shows all current installed mods. Click to download."
             items={modlist}
             isLoading={modListFetching}
             didLoadingFail={modListFetchFailed}

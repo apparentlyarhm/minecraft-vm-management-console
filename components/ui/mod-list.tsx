@@ -14,6 +14,7 @@ import { useToast } from "../context/ToastContext";
 
 
 const ModList = ({
+    isFallback,
     value,
     title,
     description,
@@ -23,6 +24,7 @@ const ModList = ({
     help,
     didLoadingFail
 }: {
+    isFallback: boolean,
     value: string;
     title: string;
     description: string;
@@ -152,6 +154,7 @@ const ModList = ({
                 <ConfirmationModal
                     filename={confirmingFile}
                     onConfirm={() => {
+                        if(!isFallback){
                         getDownloadLink(confirmingFile)
                             .then((res) => {
                                 const link = res.message;
@@ -186,6 +189,10 @@ const ModList = ({
                             .finally(() => {
                                 setConfirmingFile(null)
                             })
+                        } 
+                        else {
+                            window.location.href="https://www.youtube.com/watch?v=5YI9noRIjwo&t"
+                        }
 
                     }}
                     onCancel={() => setConfirmingFile(null)}
