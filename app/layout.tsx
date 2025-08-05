@@ -4,8 +4,6 @@ import { PrimeReactProvider } from "primereact/api";
 import { ToastProvider } from "@/components/context/ToastContext";
 import "./globals.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
-import AppWrapper from "@/lib/AppWrapper";
-import { isServerUp } from "@/lib/component-utils/pingUtils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +25,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isFallbackMode = !(await isServerUp());
 
   return (
     <html lang="en" className="font-ember">
@@ -37,9 +34,7 @@ export default async function RootLayout({
         <PrimeReactProvider value={{ unstyled: false }}>
           <ToastProvider>
 
-            <AppWrapper isFallbackMode={isFallbackMode}>
               {children}
-            </AppWrapper>
 
           </ToastProvider>
         </PrimeReactProvider>
