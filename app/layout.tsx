@@ -7,19 +7,9 @@ import "primereact/resources/themes/lara-light-cyan/theme.css";
 import AppWrapper from "@/lib/AppWrapper";
 import { isServerUp } from "@/lib/component-utils/pingUtils";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "MC server console",
-  description: "description",
+  description: "it does something",
 };
 
 export default async function RootLayout({
@@ -32,7 +22,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="font-ember">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={``}
       >
         <PrimeReactProvider value={{ unstyled: false }}>
           <ToastProvider>
