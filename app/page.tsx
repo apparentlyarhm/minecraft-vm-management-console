@@ -117,7 +117,7 @@ export default function VMDashboard() {
 
       success({
         heading: "Copied!",
-        message: "Public IPv4 address copied to clipboard.",
+        message: "Server address copied to clipboard.",
         duration: 3000,
       });
 
@@ -244,11 +244,16 @@ export default function VMDashboard() {
 
   useEffect(() => {
     setIsMotdFetching(true);
+    const ip = details["Public IP"] as string;
+    
+    if (!ip) return;
 
-    fetchMotd(details["Public IP"] as string, isFallback)
+    fetchMotd(ip, isFallback)
       .then((motd) => setMotdDetails(motd))
       .catch((error) => console.error("Error fetching MOTD:", error))
       .finally(() => setIsMotdFetching(false));
+    
+    console.log(motdDetails)
   }, [details]);
 
   const { variant, bg, icon: Icon, } = getStatusStyles(details["Status"] as string);
