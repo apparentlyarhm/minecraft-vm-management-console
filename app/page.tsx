@@ -246,14 +246,14 @@ export default function VMDashboard() {
   useEffect(() => {
     setIsMotdFetching(true);
     const ip = details["Public IP"] as string;
-    
+
     if (!ip) return;
 
     fetchMotd(ip, isFallback)
       .then((motd) => setMotdDetails(motd))
       .catch((error) => console.error("Error fetching MOTD:", error))
       .finally(() => setIsMotdFetching(false));
-    
+
     console.log(motdDetails)
   }, [details]);
 
@@ -467,10 +467,11 @@ export default function VMDashboard() {
             didLoadingFail={modListFetchFailed}
           />
           <AdminComponent
+            address={details["Public IP"] as string}
             isFallback={isFallback}
             value="admin-controls"
             title="Admin Commands"
-            description="Execute RCON commands on the server remotely. Requires RCON to be enabled and configured on the server. Needs login and admin status on the API server"
+            description="Execute commands on the server remotely. Requires RCON to be enabled and configured on the server. Needs login and admin status on the API server"
             help="Remote Console (RCON) is a protocol that allows server administrators to remotely execute commands on the Minecraft server. It requires RCON to be enabled in the server.properties file, along with a secure password. Once configured, you can send commands to the server as if you were typing them directly into the server console. This is useful for managing the server without needing direct access to the host machine."
             players={motdDetails["Online players"] as string[] || []}
             isLoading={modListFetching}
