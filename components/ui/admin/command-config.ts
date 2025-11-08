@@ -1,6 +1,6 @@
 import { Clock, Cloud, FileQuestion, MousePointer2, Podcast, UserPlus, UserRoundX, UserX } from "lucide-react";
 
-type Command = {
+export type Command = {
     name: string;
     description: string;
     key: string;
