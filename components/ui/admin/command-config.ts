@@ -17,5 +17,5 @@ export const Commands: Command[] = [
     { name: 'Say', description: 'Broadcast a message to all players on the server.', key: 'SAY', num_args: 1, args: ['message'], icon:  Podcast },
     { name: 'Time Set', description: 'Sets the in-game time to a specific value.', key: 'TIME_SET', num_args: 1, args: ['time'], icon:  Clock },
     { name: 'Weather Set', description: 'Changes the in-game weather to a specified type.', key: 'WEATHER_SET', num_args: 1, args: ['weather_type'], icon:  Cloud },
-    { name: 'Custom...', description: 'Enter a custom command', key: 'WEATHER_SET', num_args: 1, args: ['enter the entire thing here'], icon:  FileQuestion },
+    { name: 'Custom...', description: 'Enter a custom command', key: 'CUSTOM', num_args: 1, args: ['enter the entire thing here'], icon:  FileQuestion },
 ]
