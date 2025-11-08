@@ -1,4 +1,5 @@
-import { Clock, Cloud, FileQuestion, MousePointer2, Podcast, UserPlus, UserRoundX, UserX } from "lucide-react";
+import { Clock, Cloud, FileQuestion, LucideProps, MousePointer2, Podcast, UserPlus, UserRoundX, UserX } from "lucide-react";
+import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type Command = {
     name: string;
@@ -6,7 +7,7 @@ export type Command = {
     key: string;
     num_args: number;
     args: string[];
-    icon: React.ComponentType<any>;
+    icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; // this is such a hack
 }
 
 export const Commands: Command[] = [
