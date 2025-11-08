@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   CALLBACK: `${BASE_URL}/api/v2/auth/callback`,
   MODS: `${BASE_URL}/api/v2/mods`,
   DOWNLOAD: `${BASE_URL}/api/v2/mods/download`,
+  RCON:`${BASE_URL}/api/v2/execute`,
 };
 
 export default API_ENDPOINTS;

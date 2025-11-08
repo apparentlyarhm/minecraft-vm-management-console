@@ -37,6 +37,7 @@ import { initiateLogin } from "@/lib/component-utils/loginUtils";
 import { ModList } from "@/components/ui/mod-list";
 import { useFallbackMode } from "@/lib/AppWrapper";
 import FallbackBanner from "@/components/ui/fallback-card";
+import AdminComponent from "@/components/ui/admin/main";
 
 export default function VMDashboard() {
 
@@ -456,7 +457,7 @@ export default function VMDashboard() {
             isLoading={isMotdFetching}
           />
           <ModList
-          isFallback={isFallback}
+            isFallback={isFallback}
             value="modlist"
             updatedAt={updatedAt}
             title={isFallback ? "Mod List (sample)" : "Mod List"}
@@ -464,6 +465,15 @@ export default function VMDashboard() {
             items={modlist}
             isLoading={modListFetching}
             didLoadingFail={modListFetchFailed}
+          />
+          <AdminComponent
+            isFallback={isFallback}
+            value="admin-controls"
+            title="Admin Commands"
+            description="Execute RCON commands on the server remotely. Requires RCON to be enabled and configured on the server. Needs login and admin status on the API server"
+            help="Remote Console (RCON) is a protocol that allows server administrators to remotely execute commands on the Minecraft server. It requires RCON to be enabled in the server.properties file, along with a secure password. Once configured, you can send commands to the server as if you were typing them directly into the server console. This is useful for managing the server without needing direct access to the host machine."
+            players={motdDetails["Online players"] as string[] || []}
+            isLoading={modListFetching}
           />
         </Tabs>
       </main>
