@@ -1,31 +1,40 @@
 import API_ENDPOINTS from "../config/endpointConfig";
+import { initiateLogin } from "./loginUtils";
 
-export const executeRCON = async (isFallback: boolean, command: string, args: string[], address: string): Promise<Record<string, string>> => {
-  if (isFallback) {
-    return {
-      message: "test"
-    };
-  }
+export const executeRCON = async (isFallback: boolean, command: string, args: string[], address: string, token: string): Promise<Record<string, string>> => {
+    if (isFallback) {
+        return {
+            message: "test"
+        };
+    }
 
-  const url = `${API_ENDPOINTS.RCON}?address=${encodeURIComponent(address)}`
-  
-  const response = await fetch(url, {
-    method: 'POST',
-    
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    
-    body: JSON.stringify({
-        command: command,
-        arguments: args
-    }),
-  });
-  
-  if (!response.ok) {
-    throw new Error("Failed to send execution request");
-  }
+    const url = `${API_ENDPOINTS.RCON}?address=${encodeURIComponent(address)}`
 
-  const data = await response.json()
-  return data;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            command: command,
+            arguments: args
+        }),
+    });
+
+    // logic is reused from the firewall one
+    if (response.status === 401) {
+        await initiateLogin()
+    }
+
+    const data = await response.json()
+    if (response.status === 403) {
+        throw new Error(data["message"]);
+    }
+
+    if (!response.ok) {
+        throw new Error("Failed to send execution request");
+    }
+
+    return data;
 }
