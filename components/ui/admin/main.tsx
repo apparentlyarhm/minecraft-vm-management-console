@@ -7,8 +7,9 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { ShieldQuestion } from "lucide-react";
+import { ArrowUpRight, ShieldQuestion } from "lucide-react";
 import Spinner from "../Spinner";
+import { Commands } from "./command-config";
 
 const AdminComponent = ({
     players,
@@ -59,14 +60,24 @@ const AdminComponent = ({
                             )}
                             {isLoading && <Spinner />}
                         </>
-                    ) : noPlayers ? (
+                    ) : !noPlayers ? (
                         <p className="text-sm italic text-muted-foreground">No players found.</p>
                     ) : (
-                        players.map((player) => (
-                            <div key={player}>
-                                {player}
-                            </div>
-                        ))
+                        <div className="grid grid-cols-2 gap-4 mb-5">
+                            {Commands.map((command) => (
+                                <div key={command.key} className="flex flex-row justify-between p-4 border rounded-lg cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600">
+                                    <div>
+                                    <div className="flex items-center">
+                                        <command.icon className="w-5 h-5 mr-2" />
+                                        <h3 className="text-medium font-semibold">{command.name}</h3>
+                                    </div>
+                                    </div>
+                                    <div>
+                                        <ArrowUpRight className="w-7 h-7" />
+                                    </div>
+                                </div>
+                            ))} 
+                        </div>
                     )}
 
                     {help && isModalOpen && (
