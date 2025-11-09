@@ -136,15 +136,14 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
 
   const t = localStorage.getItem("app_token") || ""
   const rconWrapper = async (command: Command, args: string[]) => {
-    let res
-    try {
-      res = await executeRCON(false, command.key, args, address, t)
 
-    } catch (e: any) {
-      setRconError(e.message)
-      return
-    }
-    setCommandResult(res.message);
+    executeRCON(false, command.key, args, address, t)
+      .then((data) => {
+        setCommandResult(data.message);
+      })
+      .catch((e: Error) => {
+        setRconError(e.message)
+      });
   }
 
   const handleCopy = (player: string) => {
