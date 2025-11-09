@@ -132,10 +132,18 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
   const [argValues, setArgValues] = useState<string[]>(() => []);
   const [copiedPlayer, setCopiedPlayer] = useState<string | null>(null);
   const [commandResult, setCommandResult] = useState<string>("");
+  const [rconError, setRconError] = useState<string | null>(null);
 
   const t = localStorage.getItem("app_token") || ""
   const rconWrapper = async (command: Command, args: string[]) => {
-    const res = await executeRCON(false, command.key, args, address, t)
+    let res
+    try {
+      res = await executeRCON(false, command.key, args, address, t)
+
+    } catch (e: any) {
+      setRconError(e.message)
+      return
+    }
     setCommandResult(res.message);
   }
 
@@ -222,6 +230,12 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
             <p className="w-full px-3 py-2 bg-gray-100 rounded-md text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">{commandResult}</p>
           </div>
         </div>
+
+        {rconError && (
+          <div className="text-sm mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+            {rconError}
+          </div>
+        )}
 
         <div className="mt-6 flex justify-end gap-2">
           <button

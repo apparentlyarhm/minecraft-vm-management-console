@@ -29,11 +29,11 @@ export const executeRCON = async (isFallback: boolean, command: string, args: st
 
     const data = await response.json()
     if (response.status === 403) {
-        throw new Error(data["message"]);
+        throw new Error("You are not allowed to perform this action.");
     }
 
     if (!response.ok) {
-        throw new Error("Failed to send execution request");
+        throw new Error("Failed to execute command");
     }
 
     return data;
