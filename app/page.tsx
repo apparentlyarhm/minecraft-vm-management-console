@@ -371,7 +371,7 @@ export default function VMDashboard() {
         [
           <span key="ip-address">{ip ? ip : "Fetching..."}</span>,
 
-          <div className="flex flex-row items-center gap-1">
+          <div key="login-details" className="flex flex-row items-center gap-1">
             <p key="user">{loggedInUser}</p>
 
             {/* Brittle logic but i dont think it matters all that much */}
