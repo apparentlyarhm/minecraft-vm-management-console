@@ -24,6 +24,9 @@ import {
   ShieldCheck,
   Loader,
   Trash2,
+  RotateCcw,
+  LogOutIcon,
+  LogInIcon,
 } from "lucide-react";
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
@@ -57,7 +60,7 @@ export default function VMDashboard() {
   const [modListFetching, setModListFetching] = useState(false)
 
   // logged in user
-  const [loggedInUser, setLoggedInUser] = useState<string>("Not Logged in")
+  const [loggedInUser, setLoggedInUser] = useState<string>("Anonymous")
 
   // User IP state vars
   const [ip, setIp] = useState<string | null>(null);
@@ -305,25 +308,91 @@ export default function VMDashboard() {
   }, []);
 
 
+  // we need a separate function for checking ip status so that it can be re-checked on demand
+  const checkIpStatus = async () => {
+    if (ip == null) {
+      error({
+        heading: "Failed to check IP status",
+        message: "Cannot determine user IP, try reloading",
+        duration: 3000,
+      });
+
+      return
+    };
+
+    info({
+      heading: "Checking...",
+      message: "Verifying IP whitelisting status",
+      duration: 2000,
+    });
+
+    try {
+      const result = await checkIpInFirewall(ip, isFallback);
+      if (result.message === "PRESENT") {
+        setIsIpPresent(true);
+
+      } else {
+        setIsIpPresent(false);
+      }
+      success({
+        heading: "Done!",
+        message: `Your IP is ${result.message.toLowerCase()}`,
+        duration: 3000,
+      });
+
+
+    } catch (e) {
+      error({
+        heading: "Failed to check IP status",
+        message: "Could not verify if IP is whitelisted",
+        duration: 3000,
+      });
+    }
+  }
+
+  const logout = () => {
+    // there is no point making this hard. ANON users cant really do anything sensitive anyway
+
+    localStorage.removeItem("app_token");
+    localStorage.removeItem("id");
+    window.location.reload();
+
+    setLoggedInUser("Anonymous")
+  }
+
+  const login = async () => {
+    await initiateLogin();
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Main content */}
+
       <TopBar items={
         [
-          <a key="github-link" href="https://github.com/apparentlyarhm/minecraft-vm-management-console" target="_blank" rel="noopener noreferrer">
-            <GitPullRequestArrow className="h-4 w-4" />
-          </a>,
-          <span key="instance-id">{details["Instance ID"]}</span>,
           <span key="ip-address">{ip ? ip : "Fetching..."}</span>,
-          <span key="user">{loggedInUser}</span>
+
+          <div className="flex flex-row items-center gap-1">
+            <p key="user">{loggedInUser}</p>
+
+            {/* Brittle logic but i dont think it matters all that much */}
+            {loggedInUser === "Anonymous" ?
+              <LogInIcon className="h-8 w-8 p-2 hover:bg-white hover:text-black rounded-xl cursor-pointer" onClick={login} />
+              :
+              <LogOutIcon className="h-8 w-8 p-2 hover:bg-white hover:text-black rounded-xl cursor-pointer" onClick={logout} />
+            }
+          </div>
         ] // I am not really sure why key is needed here. the linter fails without it, but run dev works without it.
       } />
+
       <main className="container mx-auto py-6">
+
         {isFallback && (<FallbackBanner />)}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+
           <div className="flex-1">
             <h1 className="text-md md:text-2xl font-semibold">{VmName}</h1>
           </div>
+
           <div className="flex items-center gap-4 mt-4 md:mt-0">
             <Button
               variant="outline"
@@ -383,7 +452,7 @@ export default function VMDashboard() {
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       Status
                     </h3>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-row items-center gap-1">
                       <Badge variant="success" className={`${bg} hover:${bg}`}>
                         <Icon className="w-4 h-4 mr-1 inline-block" />{" "}
                         {details["Status"]}
@@ -394,31 +463,31 @@ export default function VMDashboard() {
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       Public IPv4 address
                     </h3>
-                    <div className="flex gap-3">
-                      <p>{details["Public IP"]}</p>
-                      <Button
-                        icon={CopyIcon}
-                        size={"icon"}
-                        onClick={handleIpCopy}
-                        customSize="h-4 w-4"
-                      ></Button>
+                    <div className="flex flex-row items-center gap-1">
+                      <p className="text-sm">{details["Public IP"]}</p>
+                      <CopyIcon className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer" onClick={handleIpCopy} />
+
                     </div>
                   </div>
-                  <div>
+                  <div className="">
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       Whitelisting status
                     </h3>
-                    {isIpPresent ? (
-                      <div className="flex items-center gap-2">
-                        <CircleCheck className="text-green-700 w-5 h-5" />
-                        <span className="text-green-800 text-sm italic">Your IP is whitelisted</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <CircleAlert className="text-blue-700 w-5 h-5" />
-                        <span className="text-blue-800 text-sm italic">Your IP is not whitelisted</span>
-                      </div>
-                    )}
+                    <div className="flex flex-row gap-1">
+                      {isIpPresent ? (
+                        <div className="flex items-center gap-2">
+                          <CircleCheck className="text-green-700 w-5 h-5" />
+                          <span className="text-green-800 text-sm italic">Your IP is whitelisted</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <CircleAlert className="text-blue-700 w-5 h-5" />
+                          <span className="text-blue-800 text-sm italic">Your IP is not whitelisted</span>
+                        </div>
+                      )}
+                      <RotateCcw className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer" onClick={checkIpStatus} />
+                    </div>
+
                   </div>
                 </>
               )}
