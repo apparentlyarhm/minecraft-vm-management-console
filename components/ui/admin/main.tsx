@@ -32,7 +32,6 @@ const AdminComponent = ({
   isLoading: boolean;
   help: string
 }) => {
-  const noPlayers = players.length === 0;
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedCommand, setSelectedCommand] = React.useState<Command | null>(null);
 
@@ -65,8 +64,6 @@ const AdminComponent = ({
               )}
               {isLoading && <Spinner />}
             </>
-          ) : noPlayers ? (
-            <p className="text-sm italic text-muted-foreground">No players found.</p>
           ) : (
             <div className="grid grid-cols-2 gap-4 mb-5">
               {Commands.map((command) => (
