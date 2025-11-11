@@ -65,25 +65,22 @@ const AdminComponent = ({
               {isLoading && <Spinner />}
             </>
           ) : (
-            <div className="grid grid-cols-2 gap-4 mb-5">
+            <div className="grid grid-cols-2 gap-5 mb-5">
               {Commands.map((command) => (
                 <div
                   key={command.key}
-                  className="flex flex-row justify-between p-4 border rounded-lg cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600"
+                  className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-lg cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600 transition"
                   onClick={() => setSelectedCommand(command)}
                 >
-                  <div>
-                    <div className="flex items-center">
-                      <command.icon className="w-5 h-5 mr-2" />
-                      <h3 className="text-medium font-semibold">{command.name}</h3>
-                    </div>
+                  <div className="flex items-center">
+                    <command.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    <h3 className="text-sm sm:text-base font-semibold">{command.name}</h3>
                   </div>
-                  <div>
-                    <ArrowUpRight className="w-7 h-7" />
-                  </div>
+                  <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               ))}
             </div>
+
           )}
 
           {help && isModalOpen && (

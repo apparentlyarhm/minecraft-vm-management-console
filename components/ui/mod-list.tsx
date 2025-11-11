@@ -95,7 +95,7 @@ const ModList = ({
                         <div className="flex flex-col gap-7">
                             {updatedAt && (
                                 <p className="text-sm font-bold text-green-800">
-                                    Last updated: {new Date(updatedAt).toUTCString()} | Current UTC: {new Date().toUTCString()}
+                                    Last updated: {new Date(updatedAt).toDateString()}
                                 </p>
                             )}
                             <input
