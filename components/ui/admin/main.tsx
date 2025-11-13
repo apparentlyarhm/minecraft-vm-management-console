@@ -7,11 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowUpRight, Check, Copy, Info, ShieldQuestion } from "lucide-react";
+import { ArrowUpRight, BrickWall, BrickWallFire, Check, Copy, Info, ShieldMinus } from "lucide-react";
 import Spinner from "../Spinner";
 import { Command, Commands } from "./command-config";
 import { useState } from "react";
 import { executeRCON } from "@/lib/component-utils/rconUtils";
+import { initiateLogin } from "@/lib/component-utils/loginUtils";
+import { makeServerPublic, purgeFirewall } from "@/lib/component-utils/firewallUtils";
+import { useToast } from "@/components/context/ToastContext";
 
 const AdminComponent = ({
   players,
@@ -34,6 +37,87 @@ const AdminComponent = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedCommand, setSelectedCommand] = React.useState<Command | null>(null);
+  const { success, error, info } = useToast(); // hook for the toasts
+
+  // purge firewall state
+  const [isPurging, setIsPurging] = useState(false);
+  const [isMakingPublic, setIsMakingPublic] = useState(false);
+
+
+  // admin functions other than rcon
+  // both functions are similar and incomplete at the catch block
+  const handlePurge = async () => {
+    setIsPurging(true)
+
+    const token = localStorage.getItem("app_token");
+
+    if (!token) {
+      await initiateLogin();
+      return;
+    }
+
+    try {
+
+      purgeFirewall(token) // didnt add the isFallback here because the button will be disabled entirely
+        .then((message) => success({
+          heading: "Purged",
+          message: "All whitelisted IPs cleared!",
+          duration: 3000,
+        }
+        ))
+        .catch((err) => error({
+          heading: "Failed to purge",
+          message: `${err}`,
+          duration: 6000,
+        }))
+        .finally(() => {
+          setIsPurging(false)
+          window.location.reload()
+        })
+
+    } catch (e) {
+      const err = e as Error;
+      if (!err.message.includes('Unauthorized')) {
+      }
+    } finally {
+    }
+  };
+
+  const handlePublic = async () => {
+    setIsMakingPublic(true)
+
+    const token = localStorage.getItem("app_token");
+
+    if (!token) {
+      await initiateLogin();
+      return;
+    }
+
+    try {
+      makeServerPublic(token)
+        .then((message) => success({
+          heading: "Done",
+          message: "Server is public!",
+          duration: 3000,
+        }
+        ))
+        .catch((err) => error({
+          heading: "Failed to change settings",
+          message: `${err}`,
+          duration: 6000,
+        }))
+        .finally(() => {
+          setIsMakingPublic(false)
+          window.location.reload()
+        })
+
+    } catch (e) {
+      const err = e as Error;
+      if (!err.message.includes('Unauthorized')) {
+      }
+    } finally {
+    }
+  };
 
   return (
     <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
@@ -68,22 +152,70 @@ const AdminComponent = ({
               {isLoading && <Spinner />}
             </>
           ) : (
-            <div className="grid grid-cols-2 gap-5 mb-5">
-              {Commands.map((command) => (
+            <div className="flex flex-col gap-3">
+              <p className="text-lg">RCON</p>
+              <div className="grid grid-cols-2 gap-5 mb-5">
+                {Commands.map((command) => (
+                  <div
+                    key={command.key}
+                    className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-xl cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600"
+                    onClick={() => setSelectedCommand(command)}
+                  >
+                    <div className="flex items-center">
+                      <command.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                      <h3 className="text-sm sm:text-base font-semibold">{command.name}</h3>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </div>
+                ))}
+              </div>
+
+              {/* we can probably refactor this better */}
+              <p className="text-lg">Access Control</p>
+              <div className="grid grid-cols-2 gap-5 mb-5">
                 <div
-                  key={command.key}
+                  key="purge-firewall"
                   className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-xl cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600"
-                  onClick={() => setSelectedCommand(command)}
+                  onClick={handlePurge}
                 >
+
                   <div className="flex items-center">
-                    <command.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    <h3 className="text-sm sm:text-base font-semibold">{command.name}</h3>
+
+                    {isPurging ? (
+                      <Spinner />
+                    ) : (
+                      <>
+                        <BrickWallFire className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                        <h3 className="text-sm sm:text-base font-semibold">Purge Firewall</h3>
+                      </>
+                    )}
                   </div>
                   <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </div>
-              ))}
-            </div>
 
+                </div>
+
+                <div
+                  key="allow-public"
+                  className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-xl cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600"
+                  onClick={handlePublic}
+                >
+
+                  <div className="flex items-center">
+                    {isMakingPublic ? (
+                      <Spinner />
+                    ) : (
+                      <>
+                        <ShieldMinus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                        <h3 className="text-sm sm:text-base font-semibold">Allow Public Access</h3>
+                      </>
+                    )}
+
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
+
+                </div>
+              </div>
+            </div>
           )}
 
           {help && isModalOpen && (

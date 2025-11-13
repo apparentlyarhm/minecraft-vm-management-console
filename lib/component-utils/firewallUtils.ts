@@ -73,3 +73,33 @@ export async function purgeFirewall(
 
   return data;
 }
+
+export async function makeServerPublic(
+  token: string
+): Promise<{ message: string }> {
+  const res = await fetch(API_ENDPOINTS.MAKE_PUBLIC, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,    
+},
+  });
+
+  if (res.status === 401 ) {
+    // 401 always means that we need to login
+    await initiateLogin()
+  }
+
+  const data = await res.json()
+  if (res.status === 403){
+    // server knows who we are, we are just not allowed to do this operation.
+    throw new Error(data["message"]);
+  }
+
+  if (!res.ok) {
+    throw new Error(data.message || 'Failed to purge firewall');
+  }
+
+  return data;
+}
+

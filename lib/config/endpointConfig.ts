@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   CHECK_IP: `${BASE_URL}/api/v2/firewall/check-ip`,
   PING: `${BASE_URL}/api/v2/ping`,
   PURGE: `${BASE_URL}/api/v2/firewall/purge`,
+  MAKE_PUBLIC: `${BASE_URL}/api/v2/firewall/make-public`,
   FIREWALL: `${BASE_URL}/api/v2/firewall`,
   MACHINE: `${BASE_URL}/api/v2/machine`,
   MOTD: `${BASE_URL}/api/v2/server-info`,

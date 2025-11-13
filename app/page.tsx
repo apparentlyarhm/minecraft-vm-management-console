@@ -163,43 +163,7 @@ export default function VMDashboard() {
       .finally(() => setModListFetching(false))
   }
 
-  const handlePurge = async () => {
-    setIsPurging(false)
-
-    const token = localStorage.getItem("app_token");
-
-    if (!token) {
-      console.log("No token found. Initiating login.");
-      await initiateLogin();
-      return;
-    }
-
-    try {
-      console.log("Token found. Attempting to purge firewall.");
-
-      purgeFirewall(token) // didnt add the isFallback here because the button will be disabled entirely
-        .then((message) => success({
-          heading: "Purged",
-          message: "All whitelisted IPs cleared!",
-          duration: 3000,
-        }
-        ))
-        .catch((err) => error({
-          heading: "Failed to purge",
-          message: `${err}`,
-          duration: 6000,
-        }))
-        .finally(() => {
-          setIsPurging(false)
-        })
-
-    } catch (e) {
-      const err = e as Error;
-      if (!err.message.includes('Unauthorized')) {
-      }
-    } finally {
-    }
-  };
+  
   const getStatusStyles = (status: string) => {
     switch (status) {
       case "RUNNING":
@@ -393,7 +357,7 @@ export default function VMDashboard() {
               <div className="flex flex-row items-center gap-1">
                 <p className="text-sm">{details['Public IP']}</p>
                 <CopyIcon
-                  className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer"
+                  className="w-8 h-8 hover:bg-gray-200 hover:text-black rounded-xl p-2 cursor-pointer"
                   onClick={handleIpCopy}
                 />
               </div>
@@ -407,17 +371,17 @@ export default function VMDashboard() {
               <div className="flex flex-row gap-1 items-center">
                 {isIpPresent ? (
                   <>
-                    <CircleCheck className="text-green-700 w-5 h-5" />
-                    <span className="text-green-800 text-sm italic">Granted</span>
+                    <CircleCheck className="text-green-400 w-5 h-5" />
+                    <span className="text-green-400 text-sm italic">Granted</span>
                   </>
                 ) : (
                   <>
-                    <CircleAlert className="text-blue-700 w-5 h-5" />
-                    <span className="text-blue-800 text-sm italic">Not granted</span>
+                    <CircleAlert className="text-blue-400 w-5 h-5" />
+                    <span className="text-blue-400 text-sm italic">Not granted</span>
                   </>
                 )}
                 <RotateCcw
-                  className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer"
+                  className="w-8 h-8 hover:bg-gray-200 hover:text-black rounded-xl p-2 cursor-pointer"
                   onClick={checkIpStatus}
                 />
               </div>
@@ -478,22 +442,6 @@ export default function VMDashboard() {
                 </p>
               )}
             </Button>
-
-            <Button
-              variant="outline"
-              onClick={handlePurge}
-              disabled={isPurging || isFallback}
-              className="border-2 rounded-full hover:bg-red-50 border-red-500"
-            >
-              {isPurging ? (
-                <Loader className="animate-spin h-4 w-4 mx-4 text-red-500" />
-              ) : (
-                <p className="flex items-center gap-2 font-ember text-red-500 mx-4 font-semibold text-xs md:text-sm">
-                  Purge Firewall
-                  <Trash2 className="w-4 h-4" />
-                </p>
-              )}
-            </Button>
           </div>
 
         </div>
@@ -543,8 +491,8 @@ export default function VMDashboard() {
             isFallback={isFallback}
             value="admin-controls"
             title="Admin Commands"
-            description="Execute commands on the server remotely. Requires RCON to be enabled and configured on the server. Needs login and admin status on the API server"
-            help="Remote Console (RCON) is a protocol that allows server administrators to remotely execute commands on the Minecraft server. It requires RCON to be enabled in the server.properties file, along with a secure password. Once configured, you can send commands to the server as if you were typing them directly into the server console. This is useful for managing the server without needing direct access to the host machine."
+            description="Various admin commands that involve minecraft RCON protocol, as well as general server access management."
+            help="Remote Console (RCON) is a protocol that allows server administrators to remotely execute commands on the Minecraft server. It requires RCON to be enabled in the server.properties file, along with a secure password. Once configured, you can send commands to the server as if you were typing them directly into the server console. This is useful for managing the server without needing direct access to the host machine. Commands other than RCON one do not interact with the Minecraft server directly, but rather with the VM hosting it."
             players={motdDetails["Online players"] as string[] || []}
             isLoading={modListFetching}
           />
