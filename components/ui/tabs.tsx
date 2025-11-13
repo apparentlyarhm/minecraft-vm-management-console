@@ -10,7 +10,7 @@ import {
 import Spinner from "@/components/ui/Spinner";
 
 import { cn } from "@/lib/utils";
-import { ShieldQuestion } from "lucide-react";
+import { Info, ShieldQuestion } from "lucide-react";
 
 const Tabs = TabsPrimitive.Root;
 
@@ -80,20 +80,24 @@ const GenericDetailsTab = ({
   return (
     <TabsContent value={value} className="space-y-4 pt-4">
       <Card className="min-h-[400px]">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CardTitle>{title}</CardTitle>
+        <CardHeader className="bg-gray-100 mb-2">
+          <div className="flex flex-row justify-between">
+            <div className="flex items-center gap-2">
+              <CardTitle>{title}</CardTitle>
+
+            </div>
             {help && (
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="text-muted-foreground hover:text-foreground focus:outline-none"
                 aria-label="Help"
               >
-                <ShieldQuestion className="w-5 h-5" />
+                <Info className="w-5   h-5 cursor-pointer" />
               </button>
             )}
           </div>
           <CardDescription>{description}</CardDescription>
+
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -102,8 +106,8 @@ const GenericDetailsTab = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(detailsMap).map(([key, value]) => (
                 <div key={key}>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                    {aliases[key] || key}
+                  <h3 className="text-xs font-medium text-muted-foreground mb-1">
+                    {(aliases[key]) || key.toUpperCase()}
                   </h3>
                   {Array.isArray(value) ? (
                     <div className="flex flex-wrap gap-2">

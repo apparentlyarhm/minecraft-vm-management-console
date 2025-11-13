@@ -41,6 +41,7 @@ import { ModList } from "@/components/ui/mod-list";
 import { useFallbackMode } from "@/lib/AppWrapper";
 import FallbackBanner from "@/components/ui/fallback-card";
 import AdminComponent from "@/components/ui/admin/main";
+import { data } from "framer-motion/client";
 
 export default function VMDashboard() {
 
@@ -365,7 +366,7 @@ export default function VMDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-white">
 
       <TopBar items={
         [
@@ -449,8 +450,8 @@ export default function VMDashboard() {
               ) : (
                 <>
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      Status
+                    <h3 className="text-xs font-medium text-muted-foreground mb-1">
+                      STATUS
                     </h3>
                     <div className="flex flex-row items-center gap-1">
                       <Badge variant="success" className={`${bg} hover:${bg}`}>
@@ -460,8 +461,8 @@ export default function VMDashboard() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      Public IPv4 address
+                    <h3 className="text-xs font-medium text-muted-foreground mb-1">
+                      PUBLIC IP
                     </h3>
                     <div className="flex flex-row items-center gap-1">
                       <p className="text-sm">{details["Public IP"]}</p>
@@ -470,19 +471,19 @@ export default function VMDashboard() {
                     </div>
                   </div>
                   <div className="">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      Whitelisting status
+                    <h3 className="text-xs font-medium text-muted-foreground mb-1">
+                      ACCESS
                     </h3>
                     <div className="flex flex-row gap-1">
                       {isIpPresent ? (
                         <div className="flex items-center gap-2">
                           <CircleCheck className="text-green-700 w-5 h-5" />
-                          <span className="text-green-800 text-sm italic">Your IP is whitelisted</span>
+                          <span className="text-green-800 text-sm italic">Granted</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
                           <CircleAlert className="text-blue-700 w-5 h-5" />
-                          <span className="text-blue-800 text-sm italic">Your IP is not whitelisted</span>
+                          <span className="text-blue-800 text-sm italic">Not granted</span>
                         </div>
                       )}
                       <RotateCcw className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer" onClick={checkIpStatus} />
@@ -547,6 +548,16 @@ export default function VMDashboard() {
           />
         </Tabs>
       </main>
+      <div className="text-center mb-4">
+        <a
+          href="https://github.com/apparentlyarhm/validator-gcp-java"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-gray-400 hover:text-gray-600"
+        >
+          view source
+        </a>
+      </div>
     </div>
   );
 }
