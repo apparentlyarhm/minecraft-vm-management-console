@@ -8,7 +8,7 @@ import AppWrapper from "@/lib/AppWrapper";
 import { isServerUp } from "@/lib/component-utils/pingUtils";
 
 export const metadata: Metadata = {
-  title: "MC server console",
+  title: "Control panel",
   description: "it does something",
 };
 

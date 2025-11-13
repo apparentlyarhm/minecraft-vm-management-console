@@ -366,26 +366,86 @@ export default function VMDashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white">
 
-      <TopBar items={
-        [
-          <span key="ip-address">{ip ? ip : "Fetching..."}</span>,
+      <TopBar
+        items={[
+          {
+            label: 'USER IP',
+            content: <span>{ip ? ip : 'Fetching...'}</span>,
+          },
+          {
+            label: 'STATUS',
+            content: isVmInfoFetching ? (
+              <Spinner />
+            ) : (
+              <Badge variant="success" className={`${bg} hover:${bg}`}>
+                <Icon className="w-4 h-4 mr-1 inline-block" />
+                {details['Status']}
+              </Badge>
+            ),
+          },
+          {
+            label: 'PUBLIC IP',
+            content: isVmInfoFetching ? (
+              <Spinner />
+            ) : (
+              <div className="flex flex-row items-center gap-1">
+                <p className="text-sm">{details['Public IP']}</p>
+                <CopyIcon
+                  className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer"
+                  onClick={handleIpCopy}
+                />
+              </div>
+            ),
+          },
+          {
+            label: 'ACCESS',
+            content: isVmInfoFetching ? (
+              <Spinner />
+            ) : (
+              <div className="flex flex-row gap-1 items-center">
+                {isIpPresent ? (
+                  <>
+                    <CircleCheck className="text-green-700 w-5 h-5" />
+                    <span className="text-green-800 text-sm italic">Granted</span>
+                  </>
+                ) : (
+                  <>
+                    <CircleAlert className="text-blue-700 w-5 h-5" />
+                    <span className="text-blue-800 text-sm italic">Not granted</span>
+                  </>
+                )}
+                <RotateCcw
+                  className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer"
+                  onClick={checkIpStatus}
+                />
+              </div>
+            ),
+          },
+          {
+            label: 'USER',
+            content: (
+              <div className="flex flex-row items-center gap-1">
+                <p>{loggedInUser}</p>
+                {loggedInUser === 'Anonymous' ? (
+                  <LogInIcon
+                    className="h-8 w-8 p-2 hover:bg-white hover:text-black rounded-xl cursor-pointer"
+                    onClick={login}
+                  />
+                ) : (
+                  <LogOutIcon
+                    className="h-8 w-8 p-2 hover:bg-white hover:text-black rounded-xl cursor-pointer"
+                    onClick={logout}
+                  />
+                )}
+              </div>
+            ),
+          },
+        ]}
+      />
 
-          <div key="login-details" className="flex flex-row items-center gap-1">
-            <p key="user">{loggedInUser}</p>
-
-            {/* Brittle logic but i dont think it matters all that much */}
-            {loggedInUser === "Anonymous" ?
-              <LogInIcon className="h-8 w-8 p-2 hover:bg-white hover:text-black rounded-xl cursor-pointer" onClick={login} />
-              :
-              <LogOutIcon className="h-8 w-8 p-2 hover:bg-white hover:text-black rounded-xl cursor-pointer" onClick={logout} />
-            }
-          </div>
-        ] // I am not really sure why key is needed here. the linter fails without it, but run dev works without it.
-      } />
-
-      <main className="container mx-auto py-6">
+      <main className="flex-grow p-6">
 
         {isFallback && (<FallbackBanner />)}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
@@ -437,64 +497,6 @@ export default function VMDashboard() {
           </div>
 
         </div>
-
-        {/* Status card */}
-        <Card className="mb-6">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Server summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {isVmInfoFetching ? (
-                <Spinner />
-              ) : (
-                <>
-                  <div>
-                    <h3 className="text-xs font-medium text-muted-foreground mb-1">
-                      STATUS
-                    </h3>
-                    <div className="flex flex-row items-center gap-1">
-                      <Badge variant="success" className={`${bg} hover:${bg}`}>
-                        <Icon className="w-4 h-4 mr-1 inline-block" />{" "}
-                        {details["Status"]}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-medium text-muted-foreground mb-1">
-                      PUBLIC IP
-                    </h3>
-                    <div className="flex flex-row items-center gap-1">
-                      <p className="text-sm">{details["Public IP"]}</p>
-                      <CopyIcon className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer" onClick={handleIpCopy} />
-
-                    </div>
-                  </div>
-                  <div className="">
-                    <h3 className="text-xs font-medium text-muted-foreground mb-1">
-                      ACCESS
-                    </h3>
-                    <div className="flex flex-row gap-1">
-                      {isIpPresent ? (
-                        <div className="flex items-center gap-2">
-                          <CircleCheck className="text-green-700 w-5 h-5" />
-                          <span className="text-green-800 text-sm italic">Granted</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <CircleAlert className="text-blue-700 w-5 h-5" />
-                          <span className="text-blue-800 text-sm italic">Not granted</span>
-                        </div>
-                      )}
-                      <RotateCcw className="w-8 h-8 hover:bg-gray-200 rounded-xl p-2 cursor-pointer" onClick={checkIpStatus} />
-                    </div>
-
-                  </div>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
         <Tabs defaultValue="details">
           <TabsList className="grid grid-cols-7 w-full">
@@ -548,16 +550,7 @@ export default function VMDashboard() {
           />
         </Tabs>
       </main>
-      <div className="text-center mb-4">
-        <a
-          href="https://github.com/apparentlyarhm/validator-gcp-java"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-gray-400 hover:text-gray-600"
-        >
-          view source
-        </a>
-      </div>
+      
     </div>
   );
 }
