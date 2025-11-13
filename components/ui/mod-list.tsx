@@ -7,7 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Download, ShieldQuestion } from "lucide-react";
+import { Download, Info, ShieldQuestion } from "lucide-react";
 import Spinner from "./Spinner";
 import { getDownloadLink } from "@/lib/component-utils/motdApiUtils";
 import { useToast } from "../context/ToastContext";
@@ -67,22 +67,23 @@ const ModList = ({
     return (
         <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
             <Card className="min-h-[400px]">
-                <CardHeader>
-                    <div className="flex items-center gap-2">
-                        <CardTitle>{title}</CardTitle>
+                <CardHeader className="bg-gray-100 mb-2">
+                    <div className="flex flex-row justify-between">
+                        <div className="flex items-center gap-2">
+                            <CardTitle>{title}</CardTitle>
+
+                        </div>
                         {help && (
                             <button
                                 onClick={() => setIsModalOpen(true)}
                                 className="text-muted-foreground hover:text-foreground focus:outline-none"
                                 aria-label="Help"
                             >
-                                <ShieldQuestion className="w-5 h-5" />
+                                <Info className="w-5 h-5 cursor-pointer" />
                             </button>
                         )}
                     </div>
                     <CardDescription>{description}</CardDescription>
-
-
 
                 </CardHeader>
                 <CardContent>
@@ -154,44 +155,44 @@ const ModList = ({
                 <ConfirmationModal
                     filename={confirmingFile}
                     onConfirm={() => {
-                        if(!isFallback){
-                        getDownloadLink(confirmingFile)
-                            .then((res) => {
-                                const link = res.message;
-                                if (typeof link === "string" && /^https:\/\/[^\s]+$/.test(link)) {
-                                    const a = document.createElement("a");
-                                    a.href = link;
-                                    a.download = ""; // optionally: `${confirmingFile}`
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
+                        if (!isFallback) {
+                            getDownloadLink(confirmingFile)
+                                .then((res) => {
+                                    const link = res.message;
+                                    if (typeof link === "string" && /^https:\/\/[^\s]+$/.test(link)) {
+                                        const a = document.createElement("a");
+                                        a.href = link;
+                                        a.download = ""; // optionally: `${confirmingFile}`
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
 
-                                    info({
-                                        heading: "Download started",
-                                        message: "Your download link is valid for 5 minutes.",
-                                        duration: 4000
-                                    });
-                                } else {
-                                    error({
-                                        heading: "Download failed",
-                                        message: "Invalid or missing download link.",
-                                        duration: 3000
-                                    });
-                                }
-                            })
-                            .catch((err) => {
-                                error({
-                                    heading: `Something went wrong while downloading ${confirmingFile}`,
-                                    duration: 3000,
-                                    message: `${err}`
+                                        info({
+                                            heading: "Download started",
+                                            message: "Your download link is valid for 5 minutes.",
+                                            duration: 4000
+                                        });
+                                    } else {
+                                        error({
+                                            heading: "Download failed",
+                                            message: "Invalid or missing download link.",
+                                            duration: 3000
+                                        });
+                                    }
                                 })
-                            })
-                            .finally(() => {
-                                setConfirmingFile(null)
-                            })
-                        } 
+                                .catch((err) => {
+                                    error({
+                                        heading: `Something went wrong while downloading ${confirmingFile}`,
+                                        duration: 3000,
+                                        message: `${err}`
+                                    })
+                                })
+                                .finally(() => {
+                                    setConfirmingFile(null)
+                                })
+                        }
                         else {
-                            window.location.href="https://www.youtube.com/watch?v=5YI9noRIjwo&t"
+                            window.location.href = "https://www.youtube.com/watch?v=5YI9noRIjwo&t"
                         }
 
                     }}

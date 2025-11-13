@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowUpRight, Check, Copy, ShieldQuestion } from "lucide-react";
+import { ArrowUpRight, Check, Copy, Info, ShieldQuestion } from "lucide-react";
 import Spinner from "../Spinner";
 import { Command, Commands } from "./command-config";
 import { useState } from "react";
@@ -38,16 +38,19 @@ const AdminComponent = ({
   return (
     <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
       <Card className="min-h-[400px]">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CardTitle>{title}</CardTitle>
+        <CardHeader className="bg-gray-100 mb-2">
+          <div className="flex flex-row justify-between">
+            <div className="flex items-center gap-2">
+              <CardTitle>{title}</CardTitle>
+
+            </div>
             {help && (
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="text-muted-foreground hover:text-foreground focus:outline-none"
                 aria-label="Help"
               >
-                <ShieldQuestion className="w-5 h-5" />
+                <Info className="w-5   h-5 cursor-pointer" />
               </button>
             )}
           </div>
@@ -69,7 +72,7 @@ const AdminComponent = ({
               {Commands.map((command) => (
                 <div
                   key={command.key}
-                  className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-lg cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600 transition"
+                  className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-xl cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600"
                   onClick={() => setSelectedCommand(command)}
                 >
                   <div className="flex items-center">

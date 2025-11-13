@@ -128,9 +128,7 @@ const GenericDetailsTab = ({
             </div>
           )}
         </CardContent>
-      </Card>
-
-      {help && isModalOpen && (
+        {help && isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-lg font-bold mb-4">Help</h2>
@@ -146,6 +144,9 @@ const GenericDetailsTab = ({
           </div>
         </div>
       )}
+      </Card>
+
+      
     </TabsContent>
   );
 };
