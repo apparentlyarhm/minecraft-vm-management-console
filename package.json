@@ -17,7 +17,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.5.0",
-    "lucide-react": "^0.483.0",
+    "lucide-react": "^0.553.0",
     "mc-interface": "file:",
     "next": "15.2.3",
     "primereact": "^10.9.3",
