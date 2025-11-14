@@ -56,31 +56,21 @@ const AdminComponent = ({
       return;
     }
 
-    try {
-
-      purgeFirewall(token) // didnt add the isFallback here because the button will be disabled entirely
-        .then((message) => success({
-          heading: "Purged",
-          message: "All whitelisted IPs cleared!",
-          duration: 3000,
-        }
-        ))
-        .catch((err) => error({
-          heading: "Failed to purge",
-          message: `${err}`,
-          duration: 6000,
-        }))
-        .finally(() => {
-          setIsPurging(false)
-          window.location.reload()
-        })
-
-    } catch (e) {
-      const err = e as Error;
-      if (!err.message.includes('Unauthorized')) {
+    purgeFirewall(token) // didnt add the isFallback here because the button will be disabled entirely
+      .then((message) => success({
+        heading: "Purged",
+        message: "All whitelisted IPs cleared!",
+        duration: 3000,
       }
-    } finally {
-    }
+      ))
+      .catch((err) => error({
+        heading: "Failed to purge",
+        message: `${err}`,
+        duration: 6000,
+      }))
+      .finally(() => {
+        setIsPurging(false)
+      })
   };
 
   const handlePublic = async () => {
@@ -93,30 +83,21 @@ const AdminComponent = ({
       return;
     }
 
-    try {
-      makeServerPublic(token)
-        .then((message) => success({
-          heading: "Done",
-          message: "Server is public!",
-          duration: 3000,
-        }
-        ))
-        .catch((err) => error({
-          heading: "Failed to change settings",
-          message: `${err}`,
-          duration: 6000,
-        }))
-        .finally(() => {
-          setIsMakingPublic(false)
-          window.location.reload()
-        })
-
-    } catch (e) {
-      const err = e as Error;
-      if (!err.message.includes('Unauthorized')) {
+    makeServerPublic(token)
+      .then((message) => success({
+        heading: "Done",
+        message: "Server is public!",
+        duration: 3000,
       }
-    } finally {
-    }
+      ))
+      .catch((err) => error({
+        heading: "Failed to change settings",
+        message: `${err}`,
+        duration: 6000,
+      }))
+      .finally(() => {
+        setIsMakingPublic(false)
+      })
   };
 
   return (
