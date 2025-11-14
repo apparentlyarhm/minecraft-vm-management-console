@@ -41,7 +41,8 @@ import { ModList } from "@/components/ui/mod-list";
 import { useFallbackMode } from "@/lib/AppWrapper";
 import FallbackBanner from "@/components/ui/fallback-card";
 import AdminComponent from "@/components/ui/admin/main";
-import { data } from "framer-motion/client";
+import { data, tr } from "framer-motion/client";
+import StillLoadingCard from "@/components/ui/still-loading-card";
 
 export default function VMDashboard() {
 
@@ -63,6 +64,9 @@ export default function VMDashboard() {
   // logged in user
   const [loggedInUser, setLoggedInUser] = useState<string>("Anonymous")
 
+  // boolean for slow loading notice
+  const [showSlowLoadingNotice, setShowSlowLoadingNotice] = useState(false);
+
   // User IP state vars
   const [ip, setIp] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(true);
@@ -83,6 +87,30 @@ export default function VMDashboard() {
   const [isMotdFetching, setIsMotdFetching] = useState(false);
 
   const VmName = isVmInfoFetching ? "fetching.." : details["Instance Name"];
+
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case "RUNNING":
+        return {
+          variant: "success",
+          bg: "bg-green-100 text-green-800",
+          icon: CircleCheck,
+        };
+      case "PROVISIONING":
+        return {
+          variant: "success",
+          bg: "bg-blue-100 text-blue-800",
+          icon: CircleAlert,
+        };
+      default:
+        return {
+          variant: "success",
+          bg: "bg-red-100 text-red-800",
+          icon: XCircle,
+        };
+    }
+  };
+  const { variant, bg, icon: Icon, } = getStatusStyles(details["Status"] as string);
 
   const handleIpAdd = async () => {
 
@@ -143,7 +171,10 @@ export default function VMDashboard() {
   const fetchMods = async () => {
     setModListFetching(true)
 
-    fetchModList(isFallback)
+    // this return here is VERY important. if we dont do it, we are implicitely returning undefined.
+    // Promise.all then gets an array like [undefined, undefined], looks at these values, sees 
+    // they are not promises, treats them as "already resolved", and immediately moves on to the .finally() block. 
+    return fetchModList(isFallback) 
       .then(res => {
         setModList(res.mods)
         setUpdateAt(res.updatedAt)
@@ -157,58 +188,46 @@ export default function VMDashboard() {
 
         setModListFetching(false)
         setModListFetchFailed(true)
-
-
       })
-      .finally(() => setModListFetching(false))
+      .finally(() => { setModListFetching(false); console.log("fetched mod list") })
   }
-
-  
-  const getStatusStyles = (status: string) => {
-    switch (status) {
-      case "RUNNING":
-        return {
-          variant: "success",
-          bg: "bg-green-100 text-green-800",
-          icon: CircleCheck,
-        };
-      case "PROVISIONING":
-        return {
-          variant: "success",
-          bg: "bg-blue-100 text-blue-800",
-          icon: CircleAlert,
-        };
-      default:
-        return {
-          variant: "success",
-          bg: "bg-red-100 text-red-800",
-          icon: XCircle,
-        };
-    }
-  };
-
-  useEffect(() => {
-    const run = async () => {
-      await fetchData();
-      await fetchMods();
-    };
-    run();
-  }, []);
 
   const fetchData = async () => {
     setIsVmInfoFetching(true);
-    console.log("inside vm fetch data")
 
-    try {
-      const vmDetails = await fetchVmDetails(isFallback);
-      setDetails(vmDetails);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error("Error fetching VM details:", error.message);
-      }
-    } finally {
-      setIsVmInfoFetching(false);
-    }
+    // same explanation for this return here.
+    return fetchVmDetails(isFallback)
+      .then(res => {
+        setDetails(res);
+      })
+      .catch(e => {
+        error({
+          heading: "Failed to fetch VM details",
+          message: `${e}`,
+          duration: 6000,
+        })
+        setIsVmInfoFetching(false)
+      })
+      .finally(() => { setIsVmInfoFetching(false); console.log("fetched vm details") });
+  };
+
+  const initializeServerData = async () => {
+    const slowTimeout = setTimeout(() => {
+      console.log("showing slow loading notice");
+      setShowSlowLoadingNotice(true) // shows a card
+    }, 4500); // after 4.5s, if not cancelled
+
+    // these are independent api calls
+    Promise.all([
+      fetchData(), // -> data
+      fetchMods() // -> mod list 
+    ])
+    .finally(() => {
+      console.log("both tasks completed, we dont care about success or failure here");
+      
+      clearTimeout(slowTimeout) // clear if queued up
+      setShowSlowLoadingNotice(false) // removes the aformentioned card, if present.
+    })
   };
 
   useEffect(() => {
@@ -222,56 +241,15 @@ export default function VMDashboard() {
       .catch((error) => console.error("Error fetching MOTD:", error))
       .finally(() => setIsMotdFetching(false));
 
-    console.log(motdDetails)
-  }, [details]);
-
-  const { variant, bg, icon: Icon, } = getStatusStyles(details["Status"] as string);
+  }, [details?.["Public IP"]]);
 
   useEffect(() => {
-    const fetchAndCheckIP = async () => {
-      console.log("fetch ip");
-      try {
-        const user = localStorage.getItem("id")
-        const token = localStorage.getItem("app_token")
+    // so it turns out that since both of these are async, the api calls to fetch machine data happens first.
+    // i think we can time that to determine if we show the slow loading card or not
 
-        if (user && token && user != "" && token != "") {
-          setLoggedInUser(user)
-        }
-
-        const response = await fetch("https://api.ipify.org?format=json");
-        const data = await response.json();
-
-        setIp(data.ip); // For UI
-        setFetchFailed(false);
-
-        // Now check firewall status with the fetched IP directly
-        const result = await checkIpInFirewall(data.ip, isFallback);
-        if (result.message === "PRESENT") {
-          setIsIpPresent(true);
-
-        } else {
-          setIsIpPresent(false);
-          info({
-            heading: "IP isn't whitelisted",
-            message: "You wont be able to connect to the server or see MOTD unless you whitelist yourself!",
-            duration: 3000,
-          })
-        }
-      } catch (e) {
-        error({
-          heading: "IP fetch failed",
-          message: "Could not determine user IP",
-          duration: 3000,
-        });
-        setFetchFailed(true);
-      } finally {
-        setIsFetching(false);
-      }
-    };
-
-    fetchAndCheckIP();
+    fetchAndCheckIP(); // ip is fetched and checked
+    initializeServerData(); // vm data is fetched
   }, []);
-
 
   // we need a separate function for checking ip status so that it can be re-checked on demand
   const checkIpStatus = async () => {
@@ -314,6 +292,47 @@ export default function VMDashboard() {
       });
     }
   }
+
+  const fetchAndCheckIP = async () => {
+    console.log("fetch ip");
+    try {
+      const user = localStorage.getItem("id")
+      const token = localStorage.getItem("app_token")
+
+      if (user && token && user != "" && token != "") {
+        setLoggedInUser(user)
+      }
+
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+
+      setIp(data.ip); // For UI
+      setFetchFailed(false);
+
+      // Now check firewall status with the fetched IP directly
+      const result = await checkIpInFirewall(data.ip, isFallback);
+      if (result.message === "PRESENT") {
+        setIsIpPresent(true);
+
+      } else {
+        setIsIpPresent(false);
+        info({
+          heading: "IP isn't whitelisted",
+          message: "You wont be able to connect to the server or see MOTD unless you whitelist yourself!",
+          duration: 3000,
+        })
+      }
+    } catch (e) {
+      error({
+        heading: "IP fetch failed",
+        message: "Could not determine user IP",
+        duration: 3000,
+      });
+      setFetchFailed(true);
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   const logout = () => {
     // there is no point making this hard. ANON users cant really do anything sensitive anyway
@@ -446,7 +465,7 @@ export default function VMDashboard() {
 
         </div>
 
-        <Tabs defaultValue="details">
+        <Tabs defaultValue="MOTD">
           <TabsList className="grid grid-cols-7 w-full">
             {tabs.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
@@ -496,9 +515,11 @@ export default function VMDashboard() {
             players={motdDetails["Online players"] as string[] || []}
             isLoading={modListFetching}
           />
+
+          {showSlowLoadingNotice && <StillLoadingCard />}
         </Tabs>
       </main>
-      
+
     </div>
   );
 }
