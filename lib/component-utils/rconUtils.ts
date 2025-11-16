@@ -26,15 +26,22 @@ export const executeRCON = async (isFallback: boolean, command: string, args: st
     if (response.status === 401) {
         await initiateLogin()
     }
+    
+    // this error is specific to RCON
+    if (response.status === 400) {
+        throw new Error("Check arguments");
+    }
 
-    const data = await response.json()
     if (response.status === 403) {
         throw new Error("You are not allowed to perform this action.");
     }
-
+    
+    // well i think we should investigate if this happens
     if (!response.ok) {
         throw new Error("Failed to execute command");
     }
+
+    const data = await response.json()
 
     return data;
 }
