@@ -1,22 +1,150 @@
-import { Clock, Cloud, FileQuestion, LucideProps, MousePointer2, Podcast, UserPlus, UserRoundX, UserX } from "lucide-react";
+import { Clock, Cloud, DrumstickIcon, FileQuestion, LucideProps, MousePointer2, Podcast, UserPlus, UserRoundX, UserX } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type Command = {
     name: string;
     description: string;
     key: string;
-    num_args: number;
-    args: string[];
+    args: CommandArg[];
     icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; // this is such a hack
 }
 
+export type CommandArg = {
+  name: string;                             // ex: "mode", "player"
+  placeholder?: string;                     // ex: "Select gamemode"
+  options?: string[];                       // if present → render chips OR dropdown
+  allowCustomInput?: boolean;               // false = chips only
+  type?: "string" | "number" | "player";    // optional typing      
+};
+
+
 export const Commands: Command[] = [
-    { name: 'Kick', description: 'Kick a player from the server using their username.', key: 'KICK', num_args: 1, args: ['username'], icon:  UserRoundX },
-    { name: 'Ban', description: 'Ban a player from the server using their username.', key: 'BAN', num_args: 1, args: ['username'], icon:  UserX },
-    { name: 'Pardon', description: 'Unban a player from the server using their username.', key: 'PARDON', num_args: 1, args: ['username'], icon:  UserPlus },
-    { name: 'Teleport', description: 'Teleports a player to anothers location.', key: 'TELEPORT', num_args: 2, args: ['player1', 'player2'], icon:  MousePointer2 },
-    { name: 'Say', description: 'Broadcast a message to all players on the server.', key: 'SAY', num_args: 1, args: ['message'], icon:  Podcast },
-    { name: 'Time Set', description: 'Sets the in-game time to a specific value.', key: 'TIME_SET', num_args: 1, args: ['time'], icon:  Clock },
-    { name: 'Weather Set', description: 'Changes the in-game weather to a specified type.', key: 'WEATHER_SET', num_args: 1, args: ['weather_type'], icon:  Cloud },
-    { name: 'Custom...', description: 'Enter a custom command', key: 'CUSTOM', num_args: 1, args: ['enter the entire thing here'], icon:  FileQuestion },
-]
+  {
+    name: 'Kick',
+    description: 'Kick a player from the server using their username.',
+    key: 'KICK',
+    args: [
+      { name: 'username', placeholder: 'Player username', type: 'player' }
+    ],
+    icon: UserRoundX
+  },
+
+  {
+    name: 'Ban',
+    description: 'Ban a player from the server using their username.',
+    key: 'BAN',
+    args: [
+      { name: 'username', placeholder: 'Player username', type: 'player' }
+    ],
+    icon: UserX
+  },
+
+  {
+    name: 'Pardon',
+    description: 'Unban a player from the server using their username.',
+    key: 'PARDON',
+    args: [
+      { name: 'username', placeholder: 'Player username' }
+    ],
+    icon: UserPlus
+  },
+
+  {
+    name: 'Teleport',
+    description: 'Teleports a player to another player.',
+    key: 'TELEPORT',
+    args: [
+      { 
+        name: 'player1', 
+        placeholder: 'Source player', 
+        type: 'player' 
+      },
+      { 
+        name: 'player2', 
+        placeholder: 'Destination player', 
+        type: 'player' 
+      },
+    ],
+    icon: MousePointer2
+  },
+
+  {
+    name: 'Say',
+    description: 'Broadcast a message to all players on the server.',
+    key: 'SAY',
+    args: [
+      { 
+        name: 'message', 
+        placeholder: 'Message to broadcast' 
+      }
+    ],
+    icon: Podcast
+  },
+
+  {
+    name: 'Time Set',
+    description: 'Sets the in-game time to a specific value.',
+    key: 'TIME_SET',
+    args: [
+      {
+        name: 'time',
+        placeholder: 'Choose a time',
+        options: ['day', 'noon', 'night', 'midnight'],
+        allowCustomInput: false
+      }
+    ],
+    icon: Clock
+  },
+
+  {
+    name: 'Weather Set',
+    description: 'Changes the weather.',
+    key: 'WEATHER_SET',
+    args: [
+      {
+        name: 'weather_type',
+        placeholder: 'Weather type',
+        options: ['clear', 'rain', 'thunder'],
+        allowCustomInput: false
+      }
+    ],
+    icon: Cloud
+  },
+
+  {
+    name: 'Gamemode',
+    description: 'Change the gamemode of a player',
+    key: 'GAMEMODE',
+    args: [
+      {
+        name: 'mode',
+        placeholder: 'The target mode',
+        options: ['creative', 'survival'],
+        allowCustomInput: false,
+        type: 'string'
+      },
+      {
+        name: 'player',
+        placeholder: 'player username',
+        options: [],
+        allowCustomInput: true,
+        type: 'player'
+      }
+    ],
+    icon: DrumstickIcon
+  },
+
+  {
+    name: 'Custom...',
+    description: 'Enter a full custom command.',
+    key: 'CUSTOM',
+    args: [
+      {
+        name: 'command',
+        placeholder: 'full command',
+        allowCustomInput: true
+      }
+    ],
+    icon: FileQuestion
+  },
+];

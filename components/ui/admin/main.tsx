@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowUpRight, BrickWall, BrickWallFire, Check, Copy, Info, ShieldMinus } from "lucide-react";
+import { ArrowUpRight, BrickWall, BrickWallFire, Check, Copy, Info, Pointer, ShieldMinus } from "lucide-react";
 import Spinner from "../Spinner";
 import { Command, Commands } from "./command-config";
 import { useState } from "react";
@@ -270,6 +270,8 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
     setArgValues(newArgs);
   };
 
+  const showPlayerPicker = command.args.some(arg => arg.type === 'player');
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full max-h-[85vh] overflow-y-auto">
@@ -280,55 +282,101 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
           {command.description}
         </p>
 
-        <p className="text-sm text-muted-foreground mb-4">
-          {"Also note that the output is not guaranteed to be returned for all custom commands so we will only show the raw response string from all commands below."}
+        <p className="text-sm bg-blue-100 p-2 rounded-lg text-blue-600  mb-4">
+          {"Not all commands give output. This feature is recommended only for basic management commands and not for absolutely everything that can be run in console"}
         </p>
 
-        <div className="mb-6">
-          <ul className="border rounded-md divide-y divide-gray-200">
-            {players.length > 0 ? (
-              players.map((player, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center px-3 py-2 text-sm"
-                >
-                  <span>{player}</span>
-                  <button
+        {showPlayerPicker && (
+          <div className="mb-6">
+            <ul className="border rounded-md divide-y divide-gray-200">
+              {players.length > 0 ? (
+                players.map((player, idx) => (
+                  <li
+                    key={idx}
+                    className="flex justify-between hover:bg-gray-100 cursor-pointer items-center px-3 py-2 text-sm"
                     onClick={() => handleCopy(player)}
-                    className="text-xs flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-100"
                   >
-                    {copiedPlayer === player ? (
+                    <span>{player}</span>
+                    <button
+                      className="text-xs flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-100"
+                    >
+                      {copiedPlayer === player ? (
+                        <>
+                          <Check className="w-4 h-4 text-green-500" />
+                        </>
+                      ) : (
+                        <>
+                          <Pointer className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </li>
+                ))
+              ) : (
+                <li className="text-sm text-gray-500 px-3 py-2 italic">No players online</li>
+              )}
+            </ul>
+          </div>
+        )}
+
+        {command.args.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold mb-2">Need following inputs:</h3>
+
+            <div className="space-y-4">
+              {command.args.map((arg, index) => {
+                const hasOptions = arg.options && arg.options.length > 0;
+                const isStrict = hasOptions && arg.allowCustomInput === false;
+
+                return (
+                  <div key={index}>
+                    {hasOptions && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {arg.options!.map((opt) => {
+                          const isSelected = argValues[index] === opt;
+
+                          return (
+                            <button
+                              key={opt}
+                              onClick={() => handleArgChange(index, opt)}
+                              className={`
+                        px-3 py-1 text-xs rounded-full border cursor-pointer
+                        ${isSelected ? "bg-blue-600 text-white border-blue-600" : "bg-gray-100 text-gray-700"}
+                        hover:bg-blue-500 hover:text-white
+                      `}
+                            >
+                              {opt}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {!isStrict && (
                       <>
-                        <Check className="w-4 h-4 text-green-500" /> Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" /> Copy
+                        <input
+                          type="text"
+                          placeholder={arg.placeholder || arg.name}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm
+                        focus:outline-none focus:ring-2 focus:ring-orange -400 placeholder-gray-300"
+                          value={argValues[index] || ""}
+                          onChange={(e) => handleArgChange(index, e.target.value)}
+                        />
+
+                        <p className="text-xs italic text-gray-500">
+                          fill this with the indicated value
+                        </p>
                       </>
                     )}
-                  </button>
-                </li>
-              ))
-            ) : (
-              <li className="text-sm text-gray-500 px-3 py-2 italic">No players online</li>
-            )}
-          </ul>
-        </div>
 
-        {command.num_args > 0 && (
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold mb-2">Enter Arguments:</h3>
-            <div className="space-y-2">
-              {Array.from({ length: command.num_args }).map((_, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder={command.args[index] || `Argument ${index + 1}`}
-                  value={argValues[index] || ""}
-                  onChange={(e) => handleArgChange(index, e.target.value)}
-                />
-              ))}
+                    {isStrict && (
+                      <p className="text-xs italic text-gray-500">
+                        Select one of the above options.
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
