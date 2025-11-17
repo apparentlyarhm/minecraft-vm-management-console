@@ -1,7 +1,13 @@
 import API_ENDPOINTS from "../config/endpointConfig";
 import { initiateLogin } from "./loginUtils";
 
-export const executeRCON = async (isFallback: boolean, command: string, args: string[], address: string, token: string): Promise<Record<string, string>> => {
+export const executeRCON = async (
+    isFallback: boolean, 
+    command: string, 
+    args: string[], 
+    address: string, 
+    token: string
+): Promise<Record<string, string>> => {
     if (isFallback) {
         return {
             message: "test"
@@ -25,6 +31,7 @@ export const executeRCON = async (isFallback: boolean, command: string, args: st
     // logic is reused from the firewall one
     if (response.status === 401) {
         await initiateLogin()
+        throw new Error("Need to login. Please wait..")
     }
     
     // this error is specific to RCON

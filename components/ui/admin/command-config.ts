@@ -24,7 +24,7 @@ export const Commands: Command[] = [
     description: 'Kick a player from the server using their username.',
     key: 'KICK',
     args: [
-      { name: 'username', placeholder: 'Player username', type: 'player' }
+      { name: 'username', placeholder: 'username to be kicked', type: 'player' }
     ],
     icon: UserRoundX
   },
@@ -34,7 +34,7 @@ export const Commands: Command[] = [
     description: 'Ban a player from the server using their username.',
     key: 'BAN',
     args: [
-      { name: 'username', placeholder: 'Player username', type: 'player' }
+      { name: 'username', placeholder: 'username to be banned', type: 'player' }
     ],
     icon: UserX
   },
@@ -44,7 +44,7 @@ export const Commands: Command[] = [
     description: 'Unban a player from the server using their username.',
     key: 'PARDON',
     args: [
-      { name: 'username', placeholder: 'Player username' }
+      { name: 'username', placeholder: 'username to be pardoned' }
     ],
     icon: UserPlus
   },

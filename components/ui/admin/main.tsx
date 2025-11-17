@@ -340,9 +340,9 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
                               key={opt}
                               onClick={() => handleArgChange(index, opt)}
                               className={`
-                        px-3 py-1 text-xs rounded-full border cursor-pointer
-                        ${isSelected ? "bg-blue-600 text-white border-blue-600" : "bg-gray-100 text-gray-700"}
-                        hover:bg-blue-500 hover:text-white
+                        px-3 py-1 text-sm rounded-lg border-1 cursor-pointer
+                        ${isSelected ? "bg-blue-600 text-white border-blue-600" : "bg-transparent text-gray-700 border-gray-300"}
+                        hover:bg-gray-200 hover:text-gray-700
                       `}
                             >
                               {opt}
@@ -363,7 +363,7 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
                           onChange={(e) => handleArgChange(index, e.target.value)}
                         />
 
-                        <p className="text-xs italic text-gray-500">
+                        <p className="text-xs italic mt-1 text-gray-500">
                           fill this with the indicated value
                         </p>
                       </>
