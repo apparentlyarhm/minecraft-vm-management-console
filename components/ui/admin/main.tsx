@@ -100,7 +100,8 @@ const AdminComponent = ({
       })
   };
 
-  let fallbackCommand: Command = {
+  // lets just keep a global constant
+  const fallbackCommand: Command = {
   
     name: 'Test',
     description: 'This is how an actual command will look. Clicking execute will execute it on the server.',
