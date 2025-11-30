@@ -2,11 +2,11 @@ import { Clock, Cloud, DrumstickIcon, FileQuestion, LucideProps, MousePointer2, 
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type Command = {
-    name: string;
-    description: string;
-    key: string;
-    args: CommandArg[];
-    icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; // this is such a hack
+  name: string;
+  description: string;
+  key: string;
+  args: CommandArg[];
+  icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; // this is such a hack
 }
 
 export type CommandArg = {
@@ -14,8 +14,11 @@ export type CommandArg = {
   placeholder?: string;                     // ex: "Select gamemode"
   options?: string[];                       // if present → render chips OR dropdown
   allowCustomInput?: boolean;               // false = chips only
-  type?: "string" | "number" | "player";    // optional typing      
+  type?: "string" | "number" | "player";    // optional typing
+  validator?: ValidatorFn;                  // its possible that not all inputs need same type of validations (or none at all)
 };
+
+export type ValidatorFn = (value: string) => boolean;
 
 
 export const Commands: Command[] = [
@@ -54,15 +57,15 @@ export const Commands: Command[] = [
     description: 'Teleports a player to another player.',
     key: 'TELEPORT',
     args: [
-      { 
-        name: 'player1', 
-        placeholder: 'Source player', 
-        type: 'player' 
+      {
+        name: 'player1',
+        placeholder: 'Source player',
+        type: 'player'
       },
-      { 
-        name: 'player2', 
-        placeholder: 'Destination player', 
-        type: 'player' 
+      {
+        name: 'player2',
+        placeholder: 'Destination player',
+        type: 'player'
       },
     ],
     icon: MousePointer2
@@ -73,9 +76,9 @@ export const Commands: Command[] = [
     description: 'Broadcast a message to all players on the server.',
     key: 'SAY',
     args: [
-      { 
-        name: 'message', 
-        placeholder: 'Message to broadcast' 
+      {
+        name: 'message',
+        placeholder: 'Message to broadcast'
       }
     ],
     icon: Podcast
@@ -148,3 +151,22 @@ export const Commands: Command[] = [
     icon: FileQuestion
   },
 ];
+
+export const validators = {
+  strictUsername: (value: string): boolean => {
+    // this validator is perfect for validating whether a supplied username is an
+    // actual valid username or coordinates- which we dont want to pass through.
+    
+    // ~ is a placeholder for current value in minecraft coordinate system
+    if (value == "~") {
+      return false
+    }
+
+    // should not be a possible number
+    if (!Number.isNaN(parseInt(value))) {
+      return false
+    }
+    // if its a single, string | alphanumeric username, then splitting it using "" will be a single item always.
+    return value.split(" ").length === 1
+  }
+}
