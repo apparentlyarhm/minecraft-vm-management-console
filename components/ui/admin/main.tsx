@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowUpRight, BrickWall, BrickWallFire, Check, Copy, Info, Pointer, ShieldMinus } from "lucide-react";
+import { ArrowUpRight, BrickWall, BrickWallFire, Check, Copy, Info, Pointer, Ratio, ShieldMinus } from "lucide-react";
 import Spinner from "../Spinner";
 import { Command, Commands } from "./command-config";
 import { useState } from "react";
@@ -100,6 +100,22 @@ const AdminComponent = ({
       })
   };
 
+  let fallbackCommand: Command = {
+  
+    name: 'Test',
+    description: 'This is how an actual command will look. Clicking execute will execute it on the server.',
+    key: 'FALLBACK',
+    args: [
+      { 
+        name: 'parameter 1', 
+        placeholder: 'you will enter something here',
+        type: 'string' 
+      }
+    ],
+    icon: Ratio
+  
+  }
+
   return (
     <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
       <Card className="min-h-[400px]">
@@ -126,9 +142,17 @@ const AdminComponent = ({
           {isFallback || isLoading ? (
             <>
               {isFallback && (
-                <p className="text-sm italic text-muted-foreground">
-                  You are viewing fallback data. No point in trying to execute commands.
-                </p>
+                <div
+                    key="sample-command"
+                    className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-xl cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600"
+                    onClick={() => setSelectedCommand(fallbackCommand)}
+                  >
+                    <div className="flex items-center">
+                      <fallbackCommand.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                      <h3 className="text-sm sm:text-base font-semibold">{fallbackCommand.name}</h3>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </div>
               )}
               {isLoading && <Spinner />}
             </>
@@ -246,6 +270,14 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
 
   const t = localStorage.getItem("app_token") || ""
   const rconWrapper = async (command: Command, args: string[]) => {
+
+    // lets keep it simple
+    if (command.key == "FALLBACK") {
+      alert("In a real scenario, you will not see this dialog, and command will execute (or login if required)")
+      setCommandResult(".. and output will appear here, again, if any.")
+      
+      return
+    }
 
     executeRCON(false, command.key, args, address, t)
       .then((data) => {
