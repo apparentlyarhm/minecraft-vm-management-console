@@ -1,4 +1,4 @@
-import { Clock, Cloud, DrumstickIcon, FileQuestion, LucideProps, MousePointer2, Podcast, UserPlus, UserRoundX, UserX } from "lucide-react";
+import { Clock, Cloud, DrumstickIcon, FileQuestion, LucideProps, MousePointer2, Podcast, TreePalm, UserPlus, UserRoundX, UserX } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type Command = {
@@ -132,6 +132,16 @@ export const Commands: Command[] = [
       }
     ],
     icon: DrumstickIcon
+  },
+
+  {
+    name: 'Seed',
+    description: 'Get the seed',
+    key: 'SEED',
+    args: [
+
+    ],
+    icon: TreePalm
   },
 
   {
