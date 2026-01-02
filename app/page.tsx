@@ -43,6 +43,7 @@ import FallbackBanner from "@/components/ui/fallback-card";
 import AdminComponent from "@/components/ui/admin/main";
 import { data, tr } from "framer-motion/client";
 import StillLoadingCard from "@/components/ui/still-loading-card";
+import LogComponent from "@/components/ui/logs/main";
 
 export default function VMDashboard() {
 
@@ -514,6 +515,12 @@ export default function VMDashboard() {
             help="Remote Console (RCON) is a protocol that allows server administrators to remotely execute commands on the Minecraft server. It requires RCON to be enabled in the server.properties file, along with a secure password. Once configured, you can send commands to the server as if you were typing them directly into the server console. This is useful for managing the server without needing direct access to the host machine. Commands other than RCON one do not interact with the Minecraft server directly, but rather with the VM hosting it."
             players={motdDetails["Online players"] as string[] || []}
             isLoading={modListFetching}
+          />
+          <LogComponent
+            value="logs"
+            title="View logs"
+            description="View the logs that server the produces. reads /logs/latest.log."
+            isFallback={isFallback}
           />
 
           {showSlowLoadingNotice && <StillLoadingCard />}
