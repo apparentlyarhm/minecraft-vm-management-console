@@ -38,24 +38,24 @@ const LogComponent = ({
         isRefetching,
         isPlaceholderData // True if showing old data while fetching new count
     } = useLogs(address, lineCount.toString(), isFallback);
-    
+
     const isBusy = isLoading || isRefetching;
     return (
         <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
             <Card className="min-h-[400px]">
                 <CardHeader className="bg-gray-100 mb-2">
-                     <div className="flex flex-row justify-between items-start">
+                    <div className="flex flex-row justify-between items-start">
                         <div className="space-y-1">
                             <CardTitle>{title}</CardTitle>
                             <CardDescription>{description}</CardDescription>
                         </div>
 
                         <div className="flex items-center gap-2">
-                            
+
                             {/* --- LINE COUNT SELECTOR --- */}
                             <div className="flex items-center bg-white border rounded px-2 py-1 h-[26px]">
                                 <span className="text-[10px] text-gray-400 mr-2 font-medium uppercase tracking-wider">Lines</span>
-                                <select 
+                                <select
                                     value={lineCount}
                                     onChange={(e) => setLineCount(Number(e.target.value))}
                                     disabled={isBusy}
@@ -93,39 +93,39 @@ const LogComponent = ({
                 <CardContent className="py-2 px-4 border-b last:border-0">
                     <div className="max-h-[500px] overflow-y-auto custom-scrollbar bg-white">
                         {isError && (
-                        <div className="bg-red-50 text-red-600 p-2 text-xs flex items-center justify-center border-b border-red-100">
-                            <AlertCircle className="w-4 h-4 mr-2" />
-                            {error instanceof Error ? error.message : "Failed to load logs"}
-                        </div>
-                    )}
-
-                    <div className="max-h-[500px] overflow-y-auto custom-scrollbar bg-white flex-1">
-                        
-                        {/* INITIAL LOADING (First mount only) */}
-                        {isLoading ? (
-                           <Spinner />
-                        ) : logs && logs.items.length > 0 ? (
-                
-                            <div className={`duration-200 ${isRefetching || isPlaceholderData ? 'opacity-50' : 'opacity-100'}`}>
-                                {logs.items.map((log, index) => (
-                                    <LogRow key={`${log.timestamp}-${index}`} log={log} />
-                                ))}
-                                
-                                {isPlaceholderData && (
-                                    <div className="p-2 text-center text-xs text-gray-400 italic">
-                                        Fetching more lines...
-                                    </div>
-                                )}
+                            <div className="bg-red-50 text-red-600 p-2 text-xs flex items-center justify-center border-b border-red-100">
+                                <AlertCircle className="w-4 h-4 mr-2" />
+                                {error instanceof Error ? error.message : "Failed to load logs"}
                             </div>
-                            
-                        ) : (
-                            !isError && (
-                                <div className="flex flex-col items-center justify-center h-48 text-gray-400">
-                                    <span className="text-xs">No logs found.</span>
-                                </div>
-                            )
                         )}
-                    </div>
+
+                        <div className="max-h-[500px] overflow-y-auto custom-scrollbar bg-white flex-1">
+
+                            {/* INITIAL LOADING (First mount only) */}
+                            {isLoading ? (
+                                <Spinner />
+                            ) : logs && logs.items.length > 0 ? (
+
+                                <div className={`duration-200 ${isRefetching || isPlaceholderData ? 'opacity-50' : 'opacity-100'}`}>
+                                    {logs.items.map((log, index) => (
+                                        <LogRow key={`${log.timestamp}-${index}`} log={log} />
+                                    ))}
+
+                                    {isPlaceholderData && (
+                                        <div className="p-2 text-center text-xs text-gray-400 italic">
+                                            Fetching more lines...
+                                        </div>
+                                    )}
+                                </div>
+
+                            ) : (
+                                !isError && (
+                                    <div className="flex flex-col items-center justify-center h-48 text-gray-400">
+                                        <span className="text-xs">No logs found.</span>
+                                    </div>
+                                )
+                            )}
+                        </div>
                     </div>
                     {help && isModalOpen && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
@@ -172,22 +172,23 @@ const LogRow = ({ log }: { log: LogEntry }) => {
             className="group flex gap-3 p-2 text-xs border-b rounded-lg hover:bg-gray-100 cursor-pointer font-mono items-center"
         >
             <span className={`h-4 w-4 rounded-full shrink-0 ${getLevelStyle(log.level)}`}></span>
-            
+
             <span className={`px-2 py-1 rounded text-xs font-bold border shrink-0 uppercase`}>
                 {log.timestamp.slice(10, log.timestamp.length)}
             </span>
 
             <div className="flex-1 min-w-0">
 
-                {log.src && (
-                    <span className="text-gray-400 text-xs select-none">    
-                        [{log.src}]  
-                    </span>
-                )}
-
                 <span className="text-gray-500 break-all group-hover:text-gray-900">
                     {log.message}
                 </span>
+
+                {log.src && (
+                    <span className="text-gray-300 text-xs select-none opacity-0 group-hover:opacity-100">
+                        --({log.src})
+                    </span>
+                )}
+
             </div>
 
             <div className="shrink-0 opacity-0 group-hover:opacity-100 flex items-center">
