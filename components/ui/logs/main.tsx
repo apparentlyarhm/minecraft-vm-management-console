@@ -7,95 +7,125 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Check, Copy, Info } from "lucide-react";
+import { AlertCircle, Check, Copy, Info, RotateCcw } from "lucide-react";
 import Spinner from "../Spinner";
-
-type LogEntry = {
-    timestamp: string;
-    level: string;
-    src: string;
-    message: string;
-};
-
-const FALLBACK: LogEntry[] = [
-    {
-        "timestamp": "02Jan2026 17:15:11.405",
-        "level": "INFO",
-        "src": "net.minecraft.server.MinecraftServer/",
-        "message": ": ligmahbulls has made the advancement [Cobweb Entanglement]"
-    },
-    {
-        "timestamp": "02Jan2026 17:15:11.405",
-        "level": "INFO",
-        "src": "net.minecraft.server.MinecraftServer/",
-        "message": ": Karma0o7 fell from a high place"
-    },
-    {
-        "timestamp": "02Jan2026 17:15:11.405",
-        "level": "WARN",
-        "src": "gravestone/",
-        "message": ": The death ID of player Karma0o7 is 10a665a3-f0ce-4273-8868-17f3c6f7e2e1"
-    },
-    {
-        "timestamp": "02Jan2026 17:15:11.405",
-        "level": "ERROR",
-        "src": "pingwheel/",
-        "message": ": Channel update: ligmahbulls -> default"
-    },
-    
-]
+import { LogEntry, useLogs } from "@/lib/component-utils/logUtils";
 
 const LogComponent = ({
     title,
     description,
     help,
     value,
-    isFallback // this boolean keeps the UI stable when the backend is down. all components have this
+    isFallback, // this boolean keeps the UI stable when the backend is down. all components have this
+    address
 }: {
     title: string;
     description: string;
     help?: string;
     value: string;
-    isFallback: boolean
+    isFallback: boolean;
+    address: string | undefined;
 }) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
-    
-    const logs = isFallback ? FALLBACK : null; 
+    const [lineCount, setLineCount] = React.useState(100);
 
+    const {
+        data: logs,
+        isLoading,
+        isError,
+        error,
+        refetch,
+        isRefetching,
+        isPlaceholderData // True if showing old data while fetching new count
+    } = useLogs(address, lineCount.toString(), isFallback);
+    
+    const isBusy = isLoading || isRefetching;
     return (
         <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
             <Card className="min-h-[400px]">
                 <CardHeader className="bg-gray-100 mb-2">
-                    <div className="flex flex-row justify-between">
-                        <div className="flex items-center gap-2">
+                     <div className="flex flex-row justify-between items-start">
+                        <div className="space-y-1">
                             <CardTitle>{title}</CardTitle>
-
+                            <CardDescription>{description}</CardDescription>
                         </div>
-                        {help && (
+
+                        <div className="flex items-center gap-2">
+                            
+                            {/* --- LINE COUNT SELECTOR --- */}
+                            <div className="flex items-center bg-white border rounded px-2 py-1 h-[26px]">
+                                <span className="text-[10px] text-gray-400 mr-2 font-medium uppercase tracking-wider">Lines</span>
+                                <select 
+                                    value={lineCount}
+                                    onChange={(e) => setLineCount(Number(e.target.value))}
+                                    disabled={isBusy}
+                                    className="text-xs bg-transparent border-none outline-none text-gray-700 font-medium cursor-pointer disabled:opacity-50"
+                                >
+                                    <option value={100}>100</option>
+                                    <option value={200}>200</option>
+                                    <option value={300}>300</option>
+                                    <option value={400}>400</option>
+                                    <option value={500}>500</option>
+                                </select>
+                            </div>
+
                             <button
-                                onClick={() => setIsModalOpen(true)}
-                                className="text-muted-foreground hover:text-foreground focus:outline-none"
-                                aria-label="Help"
+                                onClick={() => refetch()}
+                                disabled={isBusy}
+                                className="flex items-center gap-1 h-[26px] text-xs bg-white border px-3 rounded hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <Info className="w-5   h-5 cursor-pointer" />
+                                {isBusy ? 'Loading...' : 'Refresh'}
                             </button>
-                        )}
+
+                            {help && (
+                                <button
+                                    onClick={() => setIsModalOpen(true)}
+                                    disabled={address ? true : false} // this is hacky
+                                    className="text-gray-400 hover:text-gray-700 focus:outline-none ml-1"
+                                >
+                                    <Info className="w-5 h-5" />
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    <CardDescription>{description}</CardDescription>
 
                 </CardHeader>
                 <CardContent className="py-2 px-4 border-b last:border-0">
                     <div className="max-h-[500px] overflow-y-auto custom-scrollbar bg-white">
-                        {logs && logs.length > 0 ? (
-                            logs.map((log, index) => (
-                                <LogRow key={index} log={log} />
-                            ))
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-48 text-gray-400 gap-2">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
-                                <span className="text-xs">Fetching logs...</span>
+                        {isError && (
+                        <div className="bg-red-50 text-red-600 p-2 text-xs flex items-center justify-center border-b border-red-100">
+                            <AlertCircle className="w-4 h-4 mr-2" />
+                            {error instanceof Error ? error.message : "Failed to load logs"}
+                        </div>
+                    )}
+
+                    <div className="max-h-[500px] overflow-y-auto custom-scrollbar bg-white flex-1">
+                        
+                        {/* INITIAL LOADING (First mount only) */}
+                        {isLoading ? (
+                           <Spinner />
+                        ) : logs && logs.items.length > 0 ? (
+                
+                            <div className={`transition-opacity duration-200 ${isRefetching || isPlaceholderData ? 'opacity-50' : 'opacity-100'}`}>
+                                {logs.items.map((log, index) => (
+                                    <LogRow key={`${log.timestamp}-${index}`} log={log} />
+                                ))}
+                                
+                                {isPlaceholderData && (
+                                    <div className="p-2 text-center text-xs text-gray-400 italic">
+                                        Fetching more lines...
+                                    </div>
+                                )}
                             </div>
+                            
+                        ) : (
+                            !isError && (
+                                <div className="flex flex-col items-center justify-center h-48 text-gray-400">
+                                    <span className="text-xs">No logs found.</span>
+                                </div>
+                            )
                         )}
+                    </div>
                     </div>
                     {help && isModalOpen && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
@@ -137,7 +167,7 @@ const LogRow = ({ log }: { log: LogEntry }) => {
     };
 
     return (
-        <div 
+        <div
             onClick={handleCopy}
             className="group flex items-start gap-3 p-2 text-xs border-b border-gray-100 hover:bg-gray-50 cursor-pointer font-mono"
         >

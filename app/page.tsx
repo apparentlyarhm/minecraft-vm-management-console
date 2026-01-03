@@ -175,7 +175,7 @@ export default function VMDashboard() {
     // this return here is VERY important. if we dont do it, we are implicitely returning undefined.
     // Promise.all then gets an array like [undefined, undefined], looks at these values, sees 
     // they are not promises, treats them as "already resolved", and immediately moves on to the .finally() block. 
-    return fetchModList(isFallback) 
+    return fetchModList(isFallback)
       .then(res => {
         setModList(res.mods)
         setUpdateAt(res.updatedAt)
@@ -223,12 +223,12 @@ export default function VMDashboard() {
       fetchData(), // -> data
       fetchMods() // -> mod list 
     ])
-    .finally(() => {
-      console.log("both tasks completed, we dont care about success or failure here");
-      
-      clearTimeout(slowTimeout) // clear if queued up
-      setShowSlowLoadingNotice(false) // removes the aformentioned card, if present.
-    })
+      .finally(() => {
+        console.log("both tasks completed, we dont care about success or failure here");
+
+        clearTimeout(slowTimeout) // clear if queued up
+        setShowSlowLoadingNotice(false) // removes the aformentioned card, if present.
+      })
   };
 
   useEffect(() => {
@@ -521,6 +521,7 @@ export default function VMDashboard() {
             title="View logs"
             description="View the logs that server the produces. reads /logs/latest.log."
             isFallback={isFallback}
+            address={details['Public IP'] ? details['Public IP'] as string : undefined}
           />
 
           {showSlowLoadingNotice && <StillLoadingCard />}
