@@ -106,7 +106,7 @@ const LogComponent = ({
                            <Spinner />
                         ) : logs && logs.items.length > 0 ? (
                 
-                            <div className={`transition-opacity duration-200 ${isRefetching || isPlaceholderData ? 'opacity-50' : 'opacity-100'}`}>
+                            <div className={`duration-200 ${isRefetching || isPlaceholderData ? 'opacity-50' : 'opacity-100'}`}>
                                 {logs.items.map((log, index) => (
                                     <LogRow key={`${log.timestamp}-${index}`} log={log} />
                                 ))}
@@ -160,39 +160,41 @@ const LogRow = ({ log }: { log: LogEntry }) => {
 
     const getLevelStyle = (level: string) => {
         switch (level.toUpperCase()) {
-            case 'ERROR': return 'text-red-600 bg-red-100 border-red-200';
-            case 'WARN': return 'text-amber-600 bg-amber-100 border-amber-200';
-            default: return 'text-emerald-600 bg-emerald-100 border-emerald-200';
+            case 'ERROR': return 'text-red-600 bg-red-400 border-red-200';
+            case 'WARN': return 'text-amber-600 bg-amber-300 border-amber-200';
+            default: return 'text-emerald-600 bg-emerald-300 border-emerald-200';
         }
     };
 
     return (
         <div
             onClick={handleCopy}
-            className="group flex items-start gap-3 p-2 text-xs border-b border-gray-100 hover:bg-gray-50 cursor-pointer font-mono"
+            className="group flex gap-3 p-2 text-xs border-b rounded-lg hover:bg-gray-100 cursor-pointer font-mono items-center"
         >
-            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border shrink-0 uppercase ${getLevelStyle(log.level)}`}>
-                {log.level}
+            <span className={`h-4 w-4 rounded-full shrink-0 ${getLevelStyle(log.level)}`}></span>
+            
+            <span className={`px-2 py-1 rounded text-xs font-bold border shrink-0 uppercase`}>
+                {log.timestamp.slice(10, log.timestamp.length)}
             </span>
 
             <div className="flex-1 min-w-0">
 
                 {log.src && (
-                    <span className="text-gray-400 text-xs mr-2 select-none">
-                        [{log.src.split('.').slice(-2).join('.')}]
+                    <span className="text-gray-400 text-xs select-none">    
+                        [{log.src}]  
                     </span>
                 )}
 
-                <span className="text-gray-700 break-all group-hover:text-gray-900">
+                <span className="text-gray-500 break-all group-hover:text-gray-900">
                     {log.message}
                 </span>
             </div>
 
-            <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="shrink-0 opacity-0 group-hover:opacity-100 flex items-center">
                 {copied ? (
                     <Check className="w-4 h-4 text-green-500" />
                 ) : (
-                    <Copy className="w-4 h-4 text-gray-300" />
+                    <Copy className="w-4 h-4 text-blue-400" />
                 )}
             </div>
         </div>
