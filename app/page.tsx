@@ -521,6 +521,7 @@ export default function VMDashboard() {
             title="View logs"
             description="View the logs that server the produces. reads /logs/latest.log."
             isFallback={isFallback}
+            help="The minecraft latest.log file is a text file in your Minecraft folder that records game events, errors, and activity. Good for troubleshooting."
             address={details['Public IP'] ? details['Public IP'] as string : undefined}
           />
 
