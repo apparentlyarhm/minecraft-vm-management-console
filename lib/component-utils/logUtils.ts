@@ -18,7 +18,8 @@ export type LogResponse = {
 const fetchLogs = async (
     address: string | undefined,
     c: string,
-    isFallback: boolean
+    isFallback: boolean,
+    token: string
 ): Promise<LogResponse> => {
 
     if (!address) {
@@ -30,19 +31,19 @@ const fetchLogs = async (
     }
 
     const url = `${API_ENDPOINTS.LOGS}?address=${encodeURIComponent(address)}&c=${encodeURIComponent(c)}`;
-    const res = await fetch(url)
-
-    // might remove this later
-    if (res.status === 404) {
-        return {items: []}
-    }
+    const res = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    })
 
     if (res.status === 401) {
         await initiateLogin()
         throw new Error("Need to login. Please wait..")
     }
     if (!res.ok) {
-        throw new Error("Failed to execute command");
+        throw new Error("Something went wrong.");
     }
 
     const data = await res.json()
@@ -80,16 +81,23 @@ const FALLBACK: LogResponse = {
 }
 
 // against the convention but whos gonna stop me?
-export const useLogs = (address: string | undefined, c: string, isFallback: boolean) => {
+export const useLogs = (
+    address: string | undefined, 
+    c: string, 
+    isFallback: boolean, 
+    token: string | null,
+    isEnabled: boolean
+) => {
     return useQuery({
         // Unique key for caching. If address changes, it refetches automatically.
-        queryKey: ['server-logs', address, c, isFallback],
-        queryFn: () => fetchLogs(address, c, isFallback),
+        queryKey: ['server-logs', address, c, isFallback, token],
+        queryFn: () => fetchLogs(address, c, isFallback, token!), // Non-null assertion is safe due to 'enabled'
 
         // If it's fallback, don't retry on error
-        retry: isFallback ? false : 2,
+        enabled: !!address && !!token && isEnabled,
+        retry: isFallback ? false : 2, 
 
         staleTime: 1000 * 1,
-        enabled: !!address,
+        placeholderData: (previousData) => previousData,
     });
 };
