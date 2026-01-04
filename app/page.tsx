@@ -4,12 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Tabs,
   TabsList,
   TabsTrigger,
@@ -20,7 +14,6 @@ import {
   CircleCheck,
   CircleAlert,
   XCircle,
-  GitPullRequestArrow,
   ShieldCheck,
   Loader,
   Trash2,
@@ -31,17 +24,15 @@ import {
 import { useToast } from "@/components/context/ToastContext";
 import Spinner from "@/components/ui/Spinner";
 import { tabs } from "@/lib/config/tabsConfig";
-import { fetchVmDetails, vmAliases, fallbackVmDetails } from "@/lib/component-utils/vmApiUtils";
-import { fetchModList, fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
-import { isServerUp } from "@/lib/component-utils/pingUtils";
+import { fetchVmDetails, vmAliases } from "@/lib/component-utils/vmApiUtils";
+import { fetchMotd, MOTDAliases } from "@/lib/component-utils/motdApiUtils";
 import TopBar from "@/components/ui/topbar";
-import { addIpToFirewall, checkIpInFirewall, purgeFirewall } from "@/lib/component-utils/firewallUtils";
+import { addIpToFirewall, checkIpInFirewall } from "@/lib/component-utils/firewallUtils";
 import { initiateLogin } from "@/lib/component-utils/loginUtils";
 import { ModList } from "@/components/ui/mod-list";
 import { useFallbackMode } from "@/lib/AppWrapper";
 import FallbackBanner from "@/components/ui/fallback-card";
 import AdminComponent from "@/components/ui/admin/main";
-import { data, tr } from "framer-motion/client";
 import StillLoadingCard from "@/components/ui/still-loading-card";
 import LogComponent from "@/components/ui/logs/main";
 
@@ -53,13 +44,9 @@ export default function VMDashboard() {
 
   // button states
   const [isWhitelisting, setIsWhitelisting] = useState(false);
-  const [isPurging, setIsPurging] = useState(false);
 
 
   // Mod List state vars
-  const [modlist, setModList] = useState<string[]>([])
-  const [updatedAt, setUpdateAt] = useState<string>("")
-  const [modListFetchFailed, setModListFetchFailed] = useState(false)
   const [modListFetching, setModListFetching] = useState(false)
 
   // logged in user
@@ -169,30 +156,6 @@ export default function VMDashboard() {
     }
   };
 
-  const fetchMods = async () => {
-    setModListFetching(true)
-
-    // this return here is VERY important. if we dont do it, we are implicitely returning undefined.
-    // Promise.all then gets an array like [undefined, undefined], looks at these values, sees 
-    // they are not promises, treats them as "already resolved", and immediately moves on to the .finally() block. 
-    return fetchModList(isFallback)
-      .then(res => {
-        setModList(res.mods)
-        setUpdateAt(res.updatedAt)
-      })
-      .catch(e => {
-        error({
-          heading: "Failed to fetch Mod list",
-          message: `${e}`,
-          duration: 6000,
-        })
-
-        setModListFetching(false)
-        setModListFetchFailed(true)
-      })
-      .finally(() => { setModListFetching(false); console.log("fetched mod list") })
-  }
-
   const fetchData = async () => {
     setIsVmInfoFetching(true);
 
@@ -221,10 +184,8 @@ export default function VMDashboard() {
     // these are independent api calls
     Promise.all([
       fetchData(), // -> data
-      fetchMods() // -> mod list 
     ])
       .finally(() => {
-        console.log("both tasks completed, we dont care about success or failure here");
 
         clearTimeout(slowTimeout) // clear if queued up
         setShowSlowLoadingNotice(false) // removes the aformentioned card, if present.
@@ -499,12 +460,9 @@ export default function VMDashboard() {
           <ModList
             isFallback={isFallback}
             value="modlist"
-            updatedAt={updatedAt}
             title={isFallback ? "Mod List (sample)" : "Mod List"}
             description="The below list shows all current installed mods. Click to download."
-            items={modlist}
-            isLoading={modListFetching}
-            didLoadingFail={modListFetchFailed}
+            help="A server mod can enchance a server's function or add features. Many mods in minecraft need to be present on both clients and servers to function correctly. Using this tab, you can download any missing mods."
           />
           <AdminComponent
             address={details["Public IP"] as string}

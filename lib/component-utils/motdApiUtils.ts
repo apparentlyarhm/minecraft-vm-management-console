@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import API_ENDPOINTS from "../config/endpointConfig";
+import { initiateLogin } from "./loginUtils";
 
 export type MOTDResponse = {
   hostname: string;
@@ -70,7 +72,11 @@ export const fetchMotd = async (
 };
 
 
-export const fetchModList = async (isFallback: boolean): Promise<ModsResponse> => {
+const fetchModList = async (
+  isFallback: boolean,
+  token: string
+): Promise<ModsResponse> => {
+
   if (isFallback) {
     return {
       updatedAt: "N/A",
@@ -78,7 +84,18 @@ export const fetchModList = async (isFallback: boolean): Promise<ModsResponse> =
     };
   }
 
-  const response = await fetch(API_ENDPOINTS.MODS);
+  const response = await fetch(API_ENDPOINTS.MODS, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+  });
+
+  if (response.status === 401) {
+    await initiateLogin()
+    throw new Error("Need to login. Please wait..")
+  }
+
   if (!response.ok) {
     throw new Error("Failed to fetch ModList!");
   }
@@ -87,18 +104,47 @@ export const fetchModList = async (isFallback: boolean): Promise<ModsResponse> =
   return data;
 }
 
-export const getDownloadLink = async (fileName: string): Promise<{ message: string }> => {
+export const getDownloadLink = async (
+  fileName: string,
+  token: string | null
+): Promise<{ message: string }> => {
 
+  if (!token) {
+        // this will never reach
+        throw new Error("Token is needed");
+  }
   const url = `${API_ENDPOINTS.DOWNLOAD}/${encodeURIComponent(fileName)}`;
-  const res = await fetch(url)
+  const res = await fetch(url, {
+    headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+  })
 
   const data = await res.json()
+
   if (res.status == 404) {
-    throw new Error(data.message);
+    throw new Error("It seems the file was not found on the server");
   }
 
   if (!res.ok) {
-    throw new Error(data.message || 'Failed to purge firewall');
+    throw new Error(data.message || 'Couldnt get the download link');
   }
   return data;
 }
+
+export const useModList = (
+    isFallback: boolean,
+    token: string | null,
+    isEnabled: boolean
+) => {
+    return useQuery({
+        queryKey: ['server-mods', isFallback, token],
+        queryFn: () => fetchModList(isFallback, token!),
+
+        enabled: !!token && isEnabled,
+        staleTime: 1000 * 60 * 5,
+
+        retry: isFallback ? false : 1,
+    });
+};
