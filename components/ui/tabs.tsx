@@ -92,7 +92,7 @@ const GenericDetailsTab = ({
                 className="text-muted-foreground hover:text-foreground focus:outline-none"
                 aria-label="Help"
               >
-                <Info className="w-5   h-5 cursor-pointer" />
+                <Info className="w-5 h-5 cursor-pointer" />
               </button>
             )}
           </div>

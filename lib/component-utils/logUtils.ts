@@ -4,17 +4,6 @@ import {
     useQuery,
 } from '@tanstack/react-query'
 
-export type LogEntry = {
-    timestamp: string;
-    level: string;
-    src: string;
-    message: string;
-};
-
-export type LogResponse = {
-    items: LogEntry[]
-}
-
 const fetchLogs = async (
     address: string | undefined,
     c: string,
@@ -78,6 +67,17 @@ const FALLBACK: LogResponse = {
             "src": "pingwheel/",
             "message": ": Channel update: ligmahbulls -> default"
         },]
+}
+
+export type LogEntry = {
+    timestamp: string;
+    level: string;
+    src: string;
+    message: string;
+};
+
+export type LogResponse = {
+    items: LogEntry[]
 }
 
 // against the convention but whos gonna stop me?

@@ -96,7 +96,7 @@ const ModListComponent = ({
         error,
         refetch,
         isRefetching,
-        
+
     } = useModList(isFallback, token, hasInitiated)
 
     const renderContent = () => {
@@ -118,7 +118,7 @@ const ModListComponent = ({
             />
         );
     };
-        const isBusy = isLoading || isRefetching;
+    const isBusy = isLoading || isRefetching;
 
     return (
         <TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
@@ -201,18 +201,16 @@ export const HEADER = ({
 
     return (
         <CardHeader className="bg-gray-100 mb-2">
-            <div className="flex flex-row justify-between items-start">
-                <div className="space-y-1">
+            <div className="flex flex-row justify-between">
+                <div className="flex items-center gap-2">
                     <CardTitle>{title}</CardTitle>
-                    <CardDescription>{description}</CardDescription>
                 </div>
 
-                <div className="flex items-center gap-1">
-
+                <div className="flex items-center gap-4">
                     <button
                         onClick={onRefresh}
                         disabled={isBusy}
-                        className="p-2 rounded-md hover:bg-gray-200 text-gray-600 disabled:opacity-50"
+                        className="rounded-md hover:bg-gray-200 text-gray-600 disabled:opacity-50"
                     >
                         <RefreshCcw className={`cursor-pointer w-4 h-4`} />
                     </button>
@@ -220,13 +218,15 @@ export const HEADER = ({
                     {onHelpClick && (
                         <button
                             onClick={onHelpClick}
-                            className="p-2 rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 "
+                            className="rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 "
                         >
                             <Info className="w-5 h-5 cursor-pointer" />
                         </button>
                     )}
                 </div>
             </div>
+            <CardDescription>{description}</CardDescription>
+
         </CardHeader>
     );
 };
@@ -284,9 +284,6 @@ const INIT = ({ onConnect }: { onConnect: () => void }) => (
 
         <div className="text-center space-y-1">
             <p className="text-sm font-medium text-gray-900">Ready to Fetch</p>
-            <p className="text-xs text-gray-400 max-w-[200px]">
-                Need to fetch modlist before downloading any.
-            </p>
         </div>
 
         <button
@@ -326,7 +323,7 @@ export const DATA = ({
 
     return (
         <div className="flex flex-col gap-4">
-            
+
             <div className="relative">
                 <input
                     type="text"
@@ -351,9 +348,9 @@ export const DATA = ({
                             key={filename}
                             className="group flex items-center justify-between p-3 bg-white border rounded-lg hover:border-gray-400 cursor-pointer"
                             onClick={(e) => {
-                                    e.stopPropagation(); // Prevent bubbling
-                                    onDownloadClick(filename);
-                                }}
+                                e.stopPropagation(); // Prevent bubbling
+                                onDownloadClick(filename);
+                            }}
                         >
                             <div className="flex items-center gap-3 overflow-hidden">
                                 <div className="p-2 bg-gray-100 rounded-md text-gray-500">
@@ -372,7 +369,7 @@ export const DATA = ({
                 <div className="flex justify-center mt-2">
                     <button
                         onClick={() => setExpanded(!expanded)}
-                        className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-black px-4 py-2 rounded-full hover:bg-gray-100 transition-colors"
+                        className="flex cursor-pointer items-center gap-1 text-xs font-medium text-gray-500 hover:text-black px-4 py-2 rounded-full hover:bg-gray-100 transition-colors"
                     >
                         {expanded ? (
                             <> Show Less</>

@@ -67,7 +67,7 @@ const LogComponent = ({
     const renderContent = () => {
         if (!isTokenLoaded) return <LOADING text="Initializing..." />;
         if (!token) return <AuthError />;
-        
+
         if (!hasInitiated) {
             return <INIT onConnect={() => setHasInitiated(true)} />;
         }
@@ -220,12 +220,9 @@ const INIT = ({ onConnect }: { onConnect: () => void }) => (
 
         <div className="text-center space-y-1">
             <p className="text-sm font-medium text-gray-900">Ready to Connect</p>
-            <p className="text-xs text-gray-400 max-w-[200px]">
-                Establish a secure connection to fetch the latest server logs.
-            </p>
         </div>
 
-        <button 
+        <button
             onClick={onConnect}
             className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-black text-white text-xs font-medium rounded-md hover:bg-gray-800"
         >
@@ -276,21 +273,20 @@ export const HEADER = ({
     }, []);
 
     return (
-        <CardHeader className="bg-gray-50 border-b pb-4">
+        <CardHeader className="bg-gray-100 mb-2">
             <div className="flex flex-row justify-between items-start">
-                <div className="space-y-1">
+                <div className="flex items-center gap-2">
                     <CardTitle>{title}</CardTitle>
-                    <CardDescription>{description}</CardDescription>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-4">
 
                     <div className="relative" ref={settingsRef}>
                         <button
                             type="button"
                             disabled={isBusy}
                             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                            className="p-2 rounded-md hover:bg-gray-200 text-gray-600  disabled:opacity-50"
+                            className="rounded-md hover:bg-gray-200 text-gray-600  disabled:opacity-50"
                         >
                             <Settings className="cursor-pointer w-4 h-4" />
                         </button>
@@ -317,7 +313,7 @@ export const HEADER = ({
                     <button
                         onClick={onRefresh}
                         disabled={isBusy}
-                        className="p-2 rounded-md hover:bg-gray-200 text-gray-600 disabled:opacity-50"
+                        className="rounded-md hover:bg-gray-200 text-gray-600 disabled:opacity-50"
                     >
                         <RefreshCcw className={`cursor-pointer w-4 h-4`} />
                     </button>
@@ -325,13 +321,15 @@ export const HEADER = ({
                     {onHelpClick && (
                         <button
                             onClick={onHelpClick}
-                            className="p-2 rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 "
+                            className="rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 "
                         >
                             <Info className="w-4 h-4 cursor-pointer" />
                         </button>
                     )}
                 </div>
             </div>
+            <CardDescription>{description}</CardDescription>
+
         </CardHeader>
     );
 };
