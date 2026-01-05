@@ -96,6 +96,10 @@ const fetchModList = async (
     throw new Error("Need to login. Please wait..")
   }
 
+  if (response.status === 403) {
+    throw new Error("You dont have permissions to view mod-list")
+  }
+
   if (!response.ok) {
     throw new Error("Failed to fetch ModList!");
   }
@@ -127,6 +131,10 @@ export const getDownloadLink = async (
     throw new Error("It seems the file was not found on the server");
   }
 
+  if (res.status === 403) {
+    throw new Error("You dont have permissions to download mods")
+  }
+
   if (!res.ok) {
     throw new Error(data.message || 'Couldnt get the download link');
   }
@@ -145,6 +153,6 @@ export const useModList = (
         enabled: !!token && isEnabled,
         staleTime: 1000 * 60 * 5,
 
-        retry: isFallback ? false : 1,
+        retry: false
     });
 };

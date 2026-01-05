@@ -31,6 +31,11 @@ const fetchLogs = async (
         await initiateLogin()
         throw new Error("Need to login. Please wait..")
     }
+
+    if (res.status === 403) {
+    throw new Error("You dont have permissions to view logs")
+  }
+
     if (!res.ok) {
         throw new Error("Something went wrong.");
     }
@@ -95,7 +100,7 @@ export const useLogs = (
 
         // If it's fallback, don't retry on error
         enabled: !!address && !!token && isEnabled,
-        retry: isFallback ? false : 2, 
+        retry: false,
 
         staleTime: 1000 * 1,
         placeholderData: (previousData) => previousData,
