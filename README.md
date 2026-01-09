@@ -5,6 +5,7 @@ A control panel designed to interface with a custom Minecraft server (hyper spec
 - whitelisting user IP
 - Modlist View, Search, and Download (no support for adding currently)
 - RCON and Access Control operations
+- Read Logs from `logs/latest.log`.
 - Oauth based Login (Github) - so inbuilt support for admin login (just make ur github)
 
 I use this to manange my own server, as well as protect it using the firewall if necessary.
@@ -28,10 +29,13 @@ Oh yeah, I copied the AWS/Amazon aesthetic for this; Ironic.
 ## Admin Controls
 <img src="./repo_assets/admin.png"> 
 
+## Logs
+<img src="./repo_assets/logs.png"> 
+
 ## Setting up and related repos
 
 do `npm install` first as usual AND you need the corresponding Backend for this.
 
-[the spring boot backend](https://github.com/apparentlyarhm/validator-gcp-java)
+[the go backend](https://github.com/apparentlyarhm/validator-gcp-go)
 
 [the terraform-based orchaestrator](https://github.com/apparentlyarhm/minecraft-terraform): this is optional, it helps automate stuff.
