@@ -100,6 +100,13 @@ const fetchModList = async (
     throw new Error("You dont have permissions to view mod-list")
   }
 
+  if (response.status === 404) {
+    return {
+      updatedAt: Date.now().toString(),
+      mods: []
+    }
+  }
+
   if (!response.ok) {
     throw new Error("Failed to fetch ModList!");
   }

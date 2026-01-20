@@ -109,8 +109,14 @@ const ModListComponent = ({
 
         if (isError) return <ApiError error={error} />;
         if (isLoading) return <LOADING text="Fetching logs..." />;
-        if (!mods) return <EmptyState />;
-
+        if (
+            !mods ||
+            !mods.mods ||
+            mods.mods.length === 0
+        ) {
+            return <EmptyState />;
+        }
+        
         return (
             <DATA
                 items={mods}
@@ -272,7 +278,7 @@ const ApiError = ({ error }: { error: unknown }) => (
 
 const EmptyState = () => (
     <div className="flex flex-col items-center justify-center h-48 text-gray-400">
-        <span className="text-xs">No logs found.</span>
+        <span className="text-xs">No Mods found.</span>
     </div>
 );
 
