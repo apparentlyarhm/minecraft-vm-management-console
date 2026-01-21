@@ -116,7 +116,7 @@ const ModListComponent = ({
         ) {
             return <EmptyState />;
         }
-        
+
         return (
             <DATA
                 items={mods}
@@ -172,22 +172,22 @@ const CONFIRM_MODAL = ({
     onConfirm: () => void;
     onCancel: () => void;
 }) => (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-lg font-bold mb-4">Confirm your download</h2>
+    <div className="fixed inset-0 flex items-center justify-center transition-all bg-black/50 z-50">
+        <div className="bg-white p-10 rounded-3xl shadow-lg max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+            <h2 className="text-3xl font-black mb-2">Confirm your download</h2>
             <p className="text-sm text-muted-foreground">
                 Do you really want to download `{filename}`? The link will only be available for 5 minutes.
             </p>
-            <div className="mt-10 gap-2 flex justify-end">
+            <div className="mt-10 gap-2 flex justify-between">
                 <button
                     onClick={onConfirm}
-                    className="px-4 py-2 bg-muted cursor-pointer text-sm rounded-3xl hover:bg-blue-700 hover:text-white focus:outline-none"
+                    className="p-3 bg-muted cursor-pointer text-sm rounded-3xl hover:bg-blue-700 hover:text-white focus:outline-none"
                 >
                     Download
                 </button>
                 <button
                     onClick={onCancel}
-                    className="px-4 py-2 bg-muted text-sm cursor-pointer rounded-3xl hover:bg-black hover:text-white focus:outline-none"
+                    className="p-3 bg-muted text-sm cursor-pointer rounded-3xl hover:bg-black hover:text-white focus:outline-none"
                 >
                     Go back
                 </button>

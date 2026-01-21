@@ -102,19 +102,19 @@ const AdminComponent = ({
 
   // lets just keep a global constant
   const fallbackCommand: Command = {
-  
+
     name: 'Test',
     description: 'This is how an actual command will look. Clicking execute will execute it on the server.',
     key: 'FALLBACK',
     args: [
-      { 
-        name: 'parameter 1', 
+      {
+        name: 'parameter 1',
         placeholder: 'you will enter something here',
-        type: 'string' 
+        type: 'string'
       }
     ],
     icon: Ratio
-  
+
   }
 
   return (
@@ -144,16 +144,16 @@ const AdminComponent = ({
             <>
               {isFallback && (
                 <div
-                    key="sample-command"
-                    className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-xl cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600"
-                    onClick={() => setSelectedCommand(fallbackCommand)}
-                  >
-                    <div className="flex items-center">
-                      <fallbackCommand.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      <h3 className="text-sm sm:text-base font-semibold">{fallbackCommand.name}</h3>
-                    </div>
-                    <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  key="sample-command"
+                  className="flex flex-row justify-between items-center p-3 sm:p-4 border rounded-xl cursor-pointer hover:bg-sky-100 hover:text-sky-900 hover:border-sky-600"
+                  onClick={() => setSelectedCommand(fallbackCommand)}
+                >
+                  <div className="flex items-center">
+                    <fallbackCommand.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    <h3 className="text-sm sm:text-base font-semibold">{fallbackCommand.name}</h3>
                   </div>
+                  <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
               )}
               {isLoading && <Spinner />}
             </>
@@ -276,7 +276,7 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
     if (command.key == "FALLBACK") {
       alert("In a real scenario, you will not see this dialog, and command will execute (or login if required)")
       setCommandResult(".. and output will appear here, again, if any.")
-      
+
       return
     }
 
@@ -306,16 +306,16 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
   const showPlayerPicker = command.args.some(arg => arg.type === 'player');
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full max-h-[85vh] overflow-y-auto">
-        <h2 className="text-lg font-bold mb-2">
-          <strong>{command.name}</strong>
+    <div className="fixed inset-0 flex items-center justify-center transition-all bg-black/50 z-50">
+      <div className="bg-white p-10 rounded-3xl shadow-lg max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+        <h2 className="text-3xl font-black mb-2">
+          {command.name}
         </h2>
         <p className="text-sm italic text-muted-foreground mb-4">
           {command.description}
         </p>
 
-        <p className="text-sm bg-blue-100 p-2 rounded-lg text-blue-600  mb-4">
+        <p className="text-sm bg-blue-100 p-4 rounded-lg text-blue-600  mb-4">
           {"Not all commands give output. This feature is recommended only for basic management commands and not for absolutely everything that can be run in console"}
         </p>
 
@@ -390,7 +390,7 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
                         <input
                           type="text"
                           placeholder={arg.placeholder || arg.name}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm
+                          className="w-full p-3 border border-gray-300 rounded-xl text-sm
                         focus:outline-none focus:ring-2 focus:ring-orange -400 placeholder-gray-300"
                           value={argValues[index] || ""}
                           onChange={(e) => handleArgChange(index, e.target.value)}
@@ -427,16 +427,16 @@ const ExecutionModal = ({ command, players, onCancel, address }: ExecutionModalP
           </div>
         )}
 
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="mt-6 flex justify-between gap-2">
           <button
             onClick={onCancel}
-            className="px-4 py-2 bg-gray-100 cursor-pointer text-sm rounded-3xl hover:bg-black hover:text-white focus:outline-none"
+            className="p-3 bg-gray-100 cursor-pointer text-sm rounded-3xl hover:bg-black hover:text-white focus:outline-none"
           >
             Go back
           </button>
           <button
             onClick={() => rconWrapper(command, argValues)}
-            className="px-4 py-2 cursor-pointer bg-blue-100 text-sm rounded-3xl hover:bg-blue-700 hover:text-white focus:outline-none"
+            className="p-3 cursor-pointer bg-blue-100 text-sm rounded-3xl hover:bg-blue-700 hover:text-white focus:outline-none"
           >
             Execute
           </button>
