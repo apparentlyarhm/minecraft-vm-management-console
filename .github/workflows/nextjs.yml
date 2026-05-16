@@ -19,55 +19,57 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: "20"
-          cache: "npm"
+          bun-version: latest
 
-      - name: Enforce NPM :D
+      - name: Enforce Bun :D
         run: |
-          if [ -f "yarn.lock" ] || [ -f "pnpm-lock.yaml" ]; then
-            echo "❌ change the workflow to allow other pkg mgrs"
+          if [ -f "package-lock.json" ] || [ -f "yarn.lock" ] || [ -f "pnpm-lock.yaml" ]; then
+            echo "only bun is allowed"
             exit 1
-          else
-            echo "✅ go ahead"
           fi
+
+          if [ ! -f "bun.lock" ]; then
+            echo "bun.lock missing"
+            exit 1
+          fi
+
+          echo "=== BUN PRESENT ==="
 
       - name: Fetch Public URL from Secrets
         run: |
           if [ -z "${{ secrets.CLOUD_RUN_SERVICE_URL }}" ]; then
-            echo "❌ ERROR: CLOUD_RUN_SERVICE_URL secret is missing!" >&2
+            echo "CLOUD_RUN_SERVICE_URL secret is missing!" >&2
             exit 1
           fi
-            echo "NEXT_PUBLIC_BASE_URL=${{ secrets.CLOUD_RUN_SERVICE_URL }}" >> $GITHUB_ENV
-        
+
+          echo "NEXT_PUBLIC_BASE_URL=${{ secrets.CLOUD_RUN_SERVICE_URL }}" >> $GITHUB_ENV
 
       - name: Setup Page
         uses: actions/configure-pages@v5
         with:
           static_site_generator: next
-      - name: Restore cache
+
+      - name: Restore Next.js cache
         uses: actions/cache@v4
         with:
           path: |
             .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          # If source files changed but packages didn't, rebuild from a prior cache.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
+
       - name: Install dependencies
-        run: npm i # Keeping it simple g
+        run: bun install --frozen-lockfile
 
       - name: Build with Next.js
         env:
           OUTPUT_EXPORT: 1
-        run:
-          echo "Building Next.js site with output export enabled"
-          echo "This will generate static files in the out directory"
-          echo "this will allow us to server files from the `/` path."
-
-          npm run build
+        run: |
+          echo "Building Next.js static export"
+          bun run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -81,6 +83,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploying to pages..
         id: deployment
         uses: actions/deploy-pages@v4
