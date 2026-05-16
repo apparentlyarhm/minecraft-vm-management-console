@@ -38,7 +38,15 @@ import LogComponent from "@/components/ui/logs/main";
 
 export default function VMDashboard() {
 
-  const isMobile = true;
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile(); // Check on mount
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+
   const isFallback = useFallbackMode();
   const [isIpPresent, setIsIpPresent] = useState(false)
 
