@@ -38,8 +38,8 @@ import LogComponent from "@/components/ui/logs/main";
 
 export default function VMDashboard() {
 
+  const isMobile = true;
   const isFallback = useFallbackMode();
-
   const [isIpPresent, setIsIpPresent] = useState(false)
 
   // button states
@@ -75,6 +75,10 @@ export default function VMDashboard() {
   const [isMotdFetching, setIsMotdFetching] = useState(false);
 
   const VmName = isVmInfoFetching ? "fetching.." : details["Instance Name"];
+
+  // actual server status
+  const [svrStatString, setSvrStatString] = useState<string>("UNAVAILABLE")
+  const [svrStatBool, setSvrStatBool] = useState<boolean>(false)
 
   const getStatusStyles = (status: string) => {
     switch (status) {
@@ -175,9 +179,28 @@ export default function VMDashboard() {
       .finally(() => { setIsVmInfoFetching(false); console.log("fetched vm details") });
   };
 
+  useEffect(() => {
+    setSvrStatString("Checking...")
+
+    if (isFallback) {
+      setSvrStatString("UNAVAILABLE")
+      return
+    }
+
+    // TODO: improve
+    if (motdDetails && motdDetails["Message of the day"] !== "Fallback Server" && motdDetails["Message of the day"] !== "") {
+      // fallback data also comes in case of server actually being down
+      setSvrStatString(`AVAILABLE, w = ${motdDetails["World Name"]}; p = ${motdDetails["Number of players online"]}/${motdDetails["Max Players"]}`)
+    }
+    else {
+      setSvrStatString("UNAVAILABLE")
+    }
+
+    return
+  }, [isFallback, motdDetails])
+
   const initializeServerData = async () => {
     const slowTimeout = setTimeout(() => {
-      console.log("showing slow loading notice");
       setShowSlowLoadingNotice(true) // shows a card
     }, 4500); // after 4.5s, if not cancelled
 
@@ -280,7 +303,7 @@ export default function VMDashboard() {
         setIsIpPresent(false);
         info({
           heading: "IP isn't whitelisted",
-          message: "You wont be able to connect to the server or see MOTD unless you whitelist yourself!",
+          message: "You wont be able to connect to the server unless you whitelist yourself!",
           duration: 3000,
         })
       }
@@ -308,6 +331,148 @@ export default function VMDashboard() {
 
   const login = async () => {
     await initiateLogin();
+  }
+
+  if (isMobile) {
+    return (
+      <div className={`flex bg-[linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),url(/minecraft-cat.gif)] bg-no-repeat bg-cover flex-col p-2 gap-2 min-h-screen items-center justify-center`}>
+        {/* temporary image */}
+
+        {/* TODO: add login */}
+        <p className="text-sm text-white font-bold">{`Hiii ${loggedInUser}! Welcome to bastion.arhm.dev!`}</p>
+
+        <br></br>
+
+        <Button
+          variant="default"
+          onClick={handleIpAdd}
+          disabled={
+            isFetching ||
+            fetchFailed ||
+            isVmInfoFetching ||
+            isIpPresent ||
+            isWhitelisting ||
+            isFallback
+          }
+          className={`
+    w-full h-auto
+    p-0
+    rounded-2xl
+    border-2
+    transition-all
+    hover:scale-[1.01]
+    active:scale-[0.99]
+    ${isFetching || fetchFailed || isVmInfoFetching
+              ? "border-gray-300"
+              : isFallback
+                ? "border-red-400"
+                : "border-sky-500"
+            }
+  `}
+        >
+          <div className="w-full p-5 text-left bg-white rounded-2xl">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-gray-400">
+                  Instance
+                </p>
+
+                <h1 className="text-lg font-bold text-gray-900">
+                  {VmName}
+                </h1>
+              </div>
+
+              {isWhitelisting ? (
+                <Loader className="animate-spin h-5 w-5 text-sky-600 shrink-0" />
+              ) : (
+                <ShieldCheck className="h-5 w-5 text-sky-600 shrink-0" />
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="my-4 border-t" />
+
+            {/* Info Grid */}
+            <div className="grid grid-cols-1 gap-3 text-sm">
+              <div>
+                <p className="text-gray-400 text-xs uppercase tracking-wide">
+                  Public IP
+                </p>
+                <p className="font-medium text-gray-800 break-all">
+                  {details["Public IP"]}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-gray-400 text-xs uppercase tracking-wide">
+                  VM Status
+                </p>
+
+                <p className="font-medium text-gray-800">
+                  {details["Status"]}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-gray-400 text-xs uppercase tracking-wide">
+                  Server Status
+                </p>
+
+                <p className="font-medium text-gray-800">
+                  {svrStatString}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-gray-400 text-xs uppercase tracking-wide">
+                  Your IP
+                </p>
+
+                <p className="font-medium text-gray-800 break-all">
+                  {ip}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-gray-400 text-xs uppercase tracking-wide">
+                  Note
+                </p>
+                <p className="text-gray-600 justify-start">Most of the desktop features of this dashboard are in development for mobile devices. In the meantime, you can, whitelist yourself, and view basic stuff.</p>
+              </div>
+
+            </div>
+
+            {/* CTA */}
+            <div className="mt-5">
+              <div
+                className={`
+          w-full rounded-xl px-4 py-3
+          text-center font-semibold text-sm
+          transition-colors
+          ${isFallback
+                    ? "bg-red-100 text-red-700"
+                    : isIpPresent
+                      ? "bg-green-100 text-green-700"
+                      : "bg-sky-100 text-sky-700"
+                  }
+        `}
+              >
+                {isFallback
+                  ? "Fallback mode: Can't whitelist!"
+                  : isIpPresent
+                    ? "Your IP is already whitelisted"
+                    : "Tap to whitelist and start playing"}
+              </div>
+            </div>
+          </div>
+        </Button>
+
+        <FallbackBanner />
+
+        {showSlowLoadingNotice && <StillLoadingCard />}
+      </div>
+    );
   }
 
   return (
