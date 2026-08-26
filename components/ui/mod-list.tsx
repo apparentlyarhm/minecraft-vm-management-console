@@ -237,14 +237,14 @@ export const HEADER = ({
     );
 };
 
-const LOADING = ({ text }: { text: string }) => (
+export const LOADING = ({ text }: { text: string }) => (
     <div className="flex flex-col items-center justify-center h-64 text-gray-400 gap-2">
         <Spinner />
         <span className="text-xs">{text}</span>
     </div>
 );
 
-const HelpModal = ({ helpText, onClose }: { helpText: string, onClose: () => void }) => (
+export const HelpModal = ({ helpText, onClose }: { helpText: string, onClose: () => void }) => (
     <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
         <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
             <h2 className="text-lg font-bold mb-4">Help</h2>

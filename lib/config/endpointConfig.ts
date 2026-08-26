@@ -19,6 +19,8 @@ export const API_ENDPOINTS = {
   DOWNLOAD: `${BASE_URL}/api/v2/mods/download`,
   RCON:`${BASE_URL}/api/v2/execute`,
   LOGS: `${BASE_URL}/api/v2/logs`,
+  METRICS: `${BASE_URL}/api/v2/metrics`,
+  METRICS_TIME_SERIES: `${BASE_URL}/api/v2/metrics/series`
 };
 
 export default API_ENDPOINTS;

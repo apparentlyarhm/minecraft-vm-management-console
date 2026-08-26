@@ -35,6 +35,7 @@ import FallbackBanner from "@/components/ui/fallback-card";
 import AdminComponent from "@/components/ui/admin/main";
 import StillLoadingCard from "@/components/ui/still-loading-card";
 import LogComponent from "@/components/ui/logs/main";
+import PerformanceGraphs from "@/components/ui/performance/main";
 
 export default function VMDashboard() {
 
@@ -81,6 +82,7 @@ export default function VMDashboard() {
     Record<string, string | number | string[]>
   >({});
   const [isMotdFetching, setIsMotdFetching] = useState(false);
+  const [activeTab, setActiveTab] = useState("MOTD");
 
   const VmName = isVmInfoFetching ? "fetching.." : details["Instance Name"];
 
@@ -600,7 +602,7 @@ export default function VMDashboard() {
 
         </div>
 
-        <Tabs defaultValue="MOTD">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-7 w-full">
             {tabs.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
@@ -654,6 +656,15 @@ export default function VMDashboard() {
             isFallback={isFallback}
             help="The minecraft latest.log file is a text file in your Minecraft folder that records game events, errors, and activity. Good for troubleshooting."
             address={details['Public IP'] ? details['Public IP'] as string : undefined}
+          />
+          <PerformanceGraphs
+            address={details['Public IP'] ? details['Public IP'] as string : undefined}
+            isFallback={isFallback}
+            isActive={activeTab === "performance"}
+            value="performance"
+            title="Performance State"
+            description="Overview of server performance metrics. (Opacity flickering is added deliberately to signify periodic updates"
+            help="A simple snapshot of how currently the metrics across the server looks like. Each metric has a simple explanation."
           />
 
           {showSlowLoadingNotice && <StillLoadingCard />}
