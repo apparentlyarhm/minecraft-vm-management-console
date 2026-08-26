@@ -92,4 +92,4 @@ export const allMetrics: MetricType[] = [
         value: "cpu",
         description: "Average CPU usage percentage of the JVM process over the last 5 minutes, relative to a single CPU core. Because this metric is scaled to a single CPU core, the resulting percentage is not capped at 100%. For example, a value of 200% indicates that the JVM process used the equivalent of two full CPU cores during (this) measurement period."
     }
-];``
+];
