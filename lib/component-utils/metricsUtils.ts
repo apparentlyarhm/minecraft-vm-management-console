@@ -14,11 +14,6 @@ const fetchMetricState = async (
     // we might need token in the future
     // token: string 
 ): Promise<MinecraftMetricsResponse> => {
-    console.debug("[useMetricState] fetchMetricState called", {
-        address: address ?? null,
-        isFallback,
-    });
-
     if (!address) {
         return FALLBACK
     }

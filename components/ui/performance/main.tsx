@@ -63,20 +63,13 @@ const PerformanceGraphs = ({
         error,
         refetch,
         isRefetching,
-        isPlaceholderData // True if showing old data while fetching new count
+        isPlaceholderData
     } = useMetricState(
         address,
         isFallback,
         // token,
         shouldFetchMetrics
     );
-
-    React.useEffect(() => {
-        console.info(
-            `[PerformanceGraphs] tab=${isActive ? "active" : "inactive"}, polling=${shouldFetchMetrics ? "enabled" : "paused"}`
-        );
-    }, [isActive, shouldFetchMetrics]);
-
 
     // const isBusy = isLoading || isRefetching;
 
