@@ -74,17 +74,6 @@ export const useMetricState = (
 ) => {
     const shouldPoll = !!address && isEnabled;
 
-    useEffect(() => {
-        console.info(
-            `[useMetricState] polling ${shouldPoll ? "enabled" : "paused"}`,
-            {
-                address: address ?? null,
-                isFallback,
-                isEnabled,
-            }
-        );
-    }, [address, isFallback, isEnabled, shouldPoll]);
-
     return useQuery({
         queryKey: ['metrics', address, isFallback],
         queryFn: () => fetchMetricState(address, isFallback),
