@@ -36,6 +36,7 @@ import AdminComponent from "@/components/ui/admin/main";
 import StillLoadingCard from "@/components/ui/still-loading-card";
 import LogComponent from "@/components/ui/logs/main";
 import PerformanceGraphs from "@/components/ui/performance/main";
+import PerformanceGraphsTab from "@/components/ui/performance-graphs/main";
 
 export default function VMDashboard() {
 
@@ -665,6 +666,16 @@ export default function VMDashboard() {
             title="Performance State"
             description="Overview of server performance metrics. (Opacity flickering is added deliberately to signify periodic updates"
             help="A simple snapshot of how currently the metrics across the server looks like. Each metric has a simple explanation."
+          />
+          
+          <PerformanceGraphsTab
+            address={details['Public IP'] ? details['Public IP'] as string : undefined}
+            isFallback={isFallback}
+            isActive={activeTab === "performance-graphs"}
+            value="performance-graphs"
+            title="Performance Graphs"
+            description="Detailed performance graphs of the server metrics over time."
+            help="These graphs provide a visual representation of various server performance metrics, helping you to analyze trends and identify potential issues."
           />
 
           {showSlowLoadingNotice && <StillLoadingCard />}

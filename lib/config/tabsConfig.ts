@@ -1,4 +1,4 @@
-import { Monitor, Globe, FileCog, ShieldUser, Logs, Gauge } from "lucide-react";
+import { Monitor, Globe, FileCog, ShieldUser, Logs, Gauge, ChartLine } from "lucide-react";
 
 export const tabs = [
   { value: "MOTD", label: "MOTD", icon: Globe },
@@ -6,5 +6,6 @@ export const tabs = [
   { value: "modlist", label: "Mod List", icon: FileCog },
   { value: "admin-controls", label: "Admin", icon: ShieldUser },
   { value: "logs", label:"Logs", icon: Logs },
-  { value: "performance", label: "Performance", icon: Gauge  }
+  { value: "performance", label: "Performance", icon: Gauge  },
+  { value: "performance-graphs", label: "Performance Graphs", icon: ChartLine }
 ];
