@@ -7,6 +7,7 @@ A control panel designed to interface with a custom Minecraft server (hyper spec
 - RCON and Access Control operations
 - Read Logs from `logs/latest.log`.
 - Oauth based Login (Github) - so inbuilt support for admin login (just make ur github)
+- Performance Graphs with reference lines for key metrics as well as summary of all metrics in a separate tab
 
 I use this to manange my own server, as well as protect it using the firewall if necessary.
 
@@ -31,6 +32,14 @@ Oh yeah, I copied the AWS/Amazon aesthetic for this; Ironic.
 
 ## Logs
 <img src="./repo_assets/logs.png"> 
+
+added in late Aug 2026 -where the app went through a domain change.
+
+## Metric State of the system
+<img src="./repo_assets/metric-summary.png"> 
+
+## Performance Graphs
+<img src="./repo_assets/graphs.png"> 
 
 ## Setting up and related repos
 
