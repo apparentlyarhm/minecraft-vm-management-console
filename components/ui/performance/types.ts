@@ -35,6 +35,7 @@ export type MetricType = {
     value: string;
     description: string;
     category: MetricCategory;
+    referenceLineValue?: number;
 }
 
 export type MetricCategory = "number" // for ticks, entities, and similar countable metrics
@@ -47,13 +48,15 @@ export const allMetrics: MetricType[] = [
         name: "TPS",
         value: "tps",
         description: "Ticks processed by the server per second. 20 TPS is the ideal target.",
-        category: "number"
+        category: "number",
+        referenceLineValue: 20
     },
     {
         name: "MSPT",
         value: "mspt",
         description: "Average time the server takes to process one tick. Lower is better; below 50 ms is ideal.",
-        category: "ms"
+        category: "ms",
+        referenceLineValue: 50,
     },
     {
         name: "Entities",
@@ -116,3 +119,5 @@ export const allMetrics: MetricType[] = [
         category: "percentage"
     }
 ];
+
+export const allMetricsFallback: MetricType[] = [allMetrics[0]];

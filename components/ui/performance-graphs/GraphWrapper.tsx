@@ -7,6 +7,7 @@ import {
 	Tooltip,
 	XAxis,
 	YAxis,
+    ReferenceLine
 } from "recharts";
 import * as React from "react";
 import { GenericMetricTimeSeries, MetricCategory } from "../performance/types";
@@ -18,6 +19,7 @@ type GraphWrapperProps = {
 	lineColor?: string;
 	height?: number;
 	yAxisWidth?: number;
+    referenceLineValue?: number;
 };
 
 const BYTES_IN_GB = 1024 * 1024 * 1024;
@@ -95,6 +97,7 @@ const GraphWrapper = ({
 	lineColor = "#2563eb",
 	height = 280,
 	yAxisWidth = 48,
+	referenceLineValue,
 }: GraphWrapperProps) => {
 	const safeData = React.useMemo(() => normalizeSeries(data), [data]);
 	const gradientId = React.useId().replace(/:/g, "");
@@ -135,6 +138,14 @@ const GraphWrapper = ({
 							style: { fill: "#6b7280", fontSize: 12 },
 						}}
 					/>
+
+                    {referenceLineValue !== undefined && (
+                        <ReferenceLine
+                            y={referenceLineValue}
+                            stroke="red"
+                            strokeDasharray="3 3"
+                        />
+                    )}
 
 					<Tooltip
 						labelFormatter={(label) => formatTimestamp(Number(label))}

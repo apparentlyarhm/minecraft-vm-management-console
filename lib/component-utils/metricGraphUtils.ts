@@ -25,6 +25,7 @@ const fetchMetricTimeSeries = async (
     }
 
     if (isFallback) {
+        console.log("Using fallback metrics");
         return FALLBACK
     }
 
@@ -69,13 +70,12 @@ const generateFallbackMetrics = (): GenericMetricTimeSeries[] => {
 
     for (let i = 0; i < 240; i++) {
         const timestamp = startTime + (i * interval);
-        const value = parseFloat((19.9 + Math.random() * 0.2).toFixed(5));
+        const value = parseFloat((19 + Math.random() * 0.9).toFixed(5));
         dataPoints.push({
             timestamp,
             value,
         });
     }
-
     return dataPoints;
 };
 
@@ -95,7 +95,7 @@ export const useMetricTimeSeries = (
     return useQuery({
         queryKey: ['metricTimeSeries', metric, address, isFallback, start, end],
         queryFn: () => fetchMetricTimeSeries(metric, address || "", isFallback, start, end),
-        enabled: !isFallback && shouldFetch,
+        // enabled: !isFallback && shouldFetch,
         refetchInterval: 1000 * 15,
     });
 };

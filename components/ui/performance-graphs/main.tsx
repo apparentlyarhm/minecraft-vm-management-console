@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Cable } from "lucide-react";
 import { useMetricTimeSeries } from "@/lib/component-utils/metricGraphUtils";
 import { HEADER, HelpModal, LOADING } from "../mod-list";
-import { allMetrics, GenericMetricTimeSeries, MetricCategory } from "../performance/types";
+import { allMetrics, allMetricsFallback, GenericMetricTimeSeries, MetricCategory } from "../performance/types";
 import GraphWrapper from "./GraphWrapper";
 
 const PerformanceGraphsTab = ({
@@ -63,8 +63,11 @@ const PerformanceGraphsTab = ({
 	);
 
 	const selectedMetricConfig =
-		allMetrics.find((metric) => metric.value === selectedMetric) ||
-		({ name: selectedMetric, category: "number" as MetricCategory });
+		allMetrics.find((metric) => {
+            return metric.value === selectedMetric
+        }) 
+    ||
+    ({ name: selectedMetric, category: "number" as MetricCategory, referenceLineValue: undefined });
 
 	const renderContent = () => {
 		if (!isTokenLoaded) return <LOADING text="Initializing..." />;
@@ -84,13 +87,14 @@ const PerformanceGraphsTab = ({
 				selectedMetric={selectedMetricConfig.name}
 				selectedMetricCategory={selectedMetricConfig.category}
 				isStale={isRefetching || isPlaceholderData}
+				referenceLineValue={selectedMetricConfig.referenceLineValue}
 			/>
 		);
 	};
 
 	return (
 		<TabsPrimitive.TabsContent value={value} className="mt-2 space-y-4 pt-4">
-			<Card className="min-h-[600px]">
+			<Card className="min-h-[400px]">
 				<HEADER
 					title={title}
 					description={description}
@@ -117,7 +121,7 @@ const PerformanceGraphsTab = ({
 							onChange={(event) => setSelectedMetric(event.target.value)}
 							className="text-xs border rounded-md px-2 py-1 bg-white"
 						>
-							{allMetrics.map((metric) => (
+							{(isFallback ? allMetricsFallback : allMetrics).map((metric) => (
 								<option key={metric.value} value={metric.value}>
 									{metric.name}
 								</option>
@@ -182,11 +186,13 @@ const DATA = ({
 	selectedMetric,
 	selectedMetricCategory,
 	isStale,
+    referenceLineValue,
 }: {
 	data: GenericMetricTimeSeries[];
 	selectedMetric: string;
 	selectedMetricCategory: MetricCategory;
 	isStale: boolean;
+    referenceLineValue?: number;
 }) => (
 	<div className={`transition-opacity duration-200 ${isStale ? "opacity-50" : "opacity-100"}`}>
 		<h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
@@ -195,9 +201,10 @@ const DATA = ({
 
 		<GraphWrapper
 			data={data}
-			height={500}
+			height={400}
 			metricLabel={selectedMetric}
 			metricCategory={selectedMetricCategory}
+            referenceLineValue={referenceLineValue}
 		/>
 	</div>
 );
