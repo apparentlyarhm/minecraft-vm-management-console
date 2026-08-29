@@ -2,10 +2,17 @@ import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Cable } from "lucide-react";
-import { useMetricTimeSeries } from "@/lib/component-utils/metricGraphUtils";
+import {
+	GroupedMetricSeriesResult,
+	useGroupedMetricTimeSeries,
+} from "@/lib/component-utils/metricGraphUtils";
 import { HEADER, HelpModal, LOADING } from "../mod-list";
-import { allMetrics, allMetricsFallback, GenericMetricTimeSeries, MetricCategory } from "../performance/types";
-import GraphWrapper from "./GraphWrapper";
+import {
+	groupedMetricGroups,
+	groupedMetricGroupsFallback,
+	MetricCategory,
+} from "../performance/types";
+import GroupedGraphWrapper from "./GroupedGraphWrapper";
 
 const PerformanceGraphsTab = ({
 	title,
@@ -25,7 +32,6 @@ const PerformanceGraphsTab = ({
 	isActive: boolean;
 }) => {
 	const [isModalOpen, setIsModalOpen] = React.useState(false);
-	const [selectedMetric, setSelectedMetric] = React.useState("tps");
 	const [hasInitiated, setHasInitiated] = React.useState(false);
 
 	const [token, setToken] = React.useState<string | null>(null);
@@ -38,6 +44,30 @@ const PerformanceGraphsTab = ({
 	}, []);
 
 	const shouldFetchMetrics = isActive && hasInitiated && !!token && isTokenLoaded;
+	const availableMetricGroups = isFallback ? groupedMetricGroupsFallback : groupedMetricGroups;
+	const [selectedGroupId, setSelectedGroupId] = React.useState<string | null>(
+		availableMetricGroups[0]?.id ?? null
+	);
+
+	React.useEffect(() => {
+		if (availableMetricGroups.length === 0) {
+			setSelectedGroupId(null);
+			return;
+		}
+
+		setSelectedGroupId((currentGroupId) => {
+			if (currentGroupId && availableMetricGroups.some((group) => group.id === currentGroupId)) {
+				return currentGroupId;
+			}
+
+			return availableMetricGroups[0].id;
+		});
+	}, [availableMetricGroups]);
+
+	const selectedGroup = React.useMemo(
+		() => availableMetricGroups.find((group) => group.id === selectedGroupId) ?? null,
+		[availableMetricGroups, selectedGroupId]
+	);
 
 	// Keep a stable default window for now: last 1 hour.
 	// const end = React.useMemo(() => Math.floor(Date.now() / 1000), []);
@@ -46,28 +76,23 @@ const PerformanceGraphsTab = ({
 
     // TODO: Allow the user to select a custom time window for the metrics.
 	const {
-		data,
+		data: groupedData,
 		isLoading,
 		isError,
 		error,
 		refetch,
 		isRefetching,
 		isPlaceholderData,
-	} = useMetricTimeSeries(
-		selectedMetric,
+	} = useGroupedMetricTimeSeries(
+		selectedGroup,
 		address,
 		isFallback,
-        undefined,
-        undefined,
+		undefined,
+		undefined,
 		shouldFetchMetrics
 	);
 
-	const selectedMetricConfig =
-		allMetrics.find((metric) => {
-            return metric.value === selectedMetric
-        }) 
-    ||
-    ({ name: selectedMetric, category: "number" as MetricCategory, referenceLineValue: undefined });
+	const isStale = isRefetching || isPlaceholderData;
 
 	const renderContent = () => {
 		if (!isTokenLoaded) return <LOADING text="Initializing..." />;
@@ -79,15 +104,21 @@ const PerformanceGraphsTab = ({
 
 		if (isError) return <ApiError error={error} />;
 		if (isLoading) return <LOADING text="Fetching metric time-series..." />;
-		if (!data || data.length === 0) return <EmptyState />;
+
+		if (!selectedGroup) {
+			return <EmptyState text="No grouped graph options are available for the current data source." />;
+		}
+
+		if (!groupedData || groupedData.length === 0 || groupedData.every((series) => series.points.length === 0)) {
+			return <EmptyState text="No grouped graph data found." />;
+		}
 
 		return (
-			<DATA
-				data={data}
-				selectedMetric={selectedMetricConfig.name}
-				selectedMetricCategory={selectedMetricConfig.category}
-				isStale={isRefetching || isPlaceholderData}
-				referenceLineValue={selectedMetricConfig.referenceLineValue}
+			<GROUPED_DATA
+				series={groupedData}
+				groupLabel={selectedGroup.name}
+				groupCategory={selectedGroup.category}
+				isStale={isStale}
 			/>
 		);
 	};
@@ -98,7 +129,7 @@ const PerformanceGraphsTab = ({
 				<HEADER
 					title={title}
 					description={description}
-					isBusy={isLoading || isRefetching}
+					isBusy={isLoading || isStale}
 					onRefresh={refetch}
 					onHelpClick={help ? () => setIsModalOpen(true) : undefined}
 				/>
@@ -111,22 +142,25 @@ const PerformanceGraphsTab = ({
 					)}
 
 					<div className="mb-4">
-						<label className="text-xs text-gray-500 mr-2" htmlFor="metric-select">
-							Metric
+						<label className="text-xs text-gray-500 mr-2" htmlFor="group-select">
+							Group
 						</label>
 
 						<select
-							id="metric-select"
-							value={selectedMetric}
-							onChange={(event) => setSelectedMetric(event.target.value)}
+							id="group-select"
+							value={selectedGroupId ?? ""}
+							onChange={(event) => setSelectedGroupId(event.target.value || null)}
 							className="text-xs border rounded-md px-2 py-1 bg-white"
+							disabled={availableMetricGroups.length === 0}
 						>
-							{(isFallback ? allMetricsFallback : allMetrics).map((metric) => (
-								<option key={metric.value} value={metric.value}>
-									{metric.name}
+							{availableMetricGroups.map((group) => (
+								<option key={group.id} value={group.id}>
+									{group.name}
 								</option>
 							))}
 						</select>
+
+						{selectedGroup && <p className="mt-2 text-xs text-gray-500">{selectedGroup.description}</p>}
 					</div>
 
 					{renderContent()}
@@ -175,38 +209,26 @@ const ApiError = ({ error }: { error: unknown }) => (
 	</div>
 );
 
-const EmptyState = () => (
+const EmptyState = ({ text = "No graph data found." }: { text?: string }) => (
 	<div className="flex flex-col items-center justify-center h-48 text-gray-400">
-		<span className="text-xs">No graph data found.</span>
+		<span className="text-xs">{text}</span>
 	</div>
 );
 
-const DATA = ({
-	data,
-	selectedMetric,
-	selectedMetricCategory,
+const GROUPED_DATA = ({
+	series,
+	groupLabel,
+	groupCategory,
 	isStale,
-    referenceLineValue,
 }: {
-	data: GenericMetricTimeSeries[];
-	selectedMetric: string;
-	selectedMetricCategory: MetricCategory;
+	series: GroupedMetricSeriesResult[];
+	groupLabel: string;
+	groupCategory: MetricCategory;
 	isStale: boolean;
-    referenceLineValue?: number;
 }) => (
 	<div className={`transition-opacity duration-200 ${isStale ? "opacity-50" : "opacity-100"}`}>
-		<h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-			{selectedMetric}
-		</h3>
+		<h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">{groupLabel}</h3>
 
-		<GraphWrapper
-			data={data}
-			height={400}
-			metricLabel={selectedMetric}
-			metricCategory={selectedMetricCategory}
-            referenceLineValue={referenceLineValue}
-		/>
+		<GroupedGraphWrapper series={series} metricCategory={groupCategory} height={400} />
 	</div>
 );
-
-export { GraphWrapper };

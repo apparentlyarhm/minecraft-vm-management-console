@@ -1,4 +1,4 @@
-import { GenericMetricTimeSeries } from "@/components/ui/performance/types";
+import { GenericMetricTimeSeries, MetricGroupConfig } from "@/components/ui/performance/types";
 import API_ENDPOINTS from "../config/endpointConfig";
 import { initiateLogin } from "./loginUtils";
 import {
@@ -40,7 +40,7 @@ const fetchMetricTimeSeries = async (
     const res = await fetch(url, {
         headers: {
             'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${token}`
+            // 'Authorization': `Bearer ${token}` // might configure in future
         },
     })
     if (res.status === 401) {
@@ -81,6 +81,55 @@ const generateFallbackMetrics = (): GenericMetricTimeSeries[] => {
 
 const FALLBACK: GenericMetricTimeSeries[] = generateFallbackMetrics();
 
+export type GroupedMetricSeriesResult = {
+    metric: string;
+    label: string;
+    color: string;
+    points: GenericMetricTimeSeries[];
+    referenceLineValue?: number;
+};
+
+const fetchGroupedMetricTimeSeries = async (
+    group: MetricGroupConfig,
+    address: string,
+    isFallback: boolean,
+    start?: number,
+    end?: number,
+): Promise<GroupedMetricSeriesResult[]> => {
+    const results = await Promise.all(
+        group.metrics.map(async (metricConfig) => {
+            try {
+                const points = await fetchMetricTimeSeries(
+                    metricConfig.metric,
+                    address,
+                    isFallback,
+                    start,
+                    end,
+                );
+
+                return {
+                    metric: metricConfig.metric,
+                    label: metricConfig.label,
+                    color: metricConfig.color,
+                    points,
+                    referenceLineValue: metricConfig.referenceLineValue,
+                };
+            } catch (error) {
+                // console.error(`Failed to fetch grouped metric ${metricConfig.metric}`, error);
+                return {
+                    metric: metricConfig.metric,
+                    label: metricConfig.label,
+                    color: metricConfig.color,
+                    points: [],
+                    referenceLineValue: metricConfig.referenceLineValue,
+                };
+            }
+        })
+    );
+
+    return results;
+};
+
 
 export const useMetricTimeSeries = (
     metric: string,
@@ -95,7 +144,28 @@ export const useMetricTimeSeries = (
     return useQuery({
         queryKey: ['metricTimeSeries', metric, address, isFallback, start, end],
         queryFn: () => fetchMetricTimeSeries(metric, address || "", isFallback, start, end),
-        // enabled: !isFallback && shouldFetch,
+        enabled: isFallback ? isEnabled : shouldFetch,
+        refetchInterval: 1000 * 15,
+    });
+};
+
+export const useGroupedMetricTimeSeries = (
+    group: MetricGroupConfig | null,
+    address: string | undefined,
+    isFallback: boolean,
+    start?: number,
+    end?: number,
+    isEnabled: boolean = true,
+) => {
+    const shouldFetch = !!address && isEnabled;
+
+    return useQuery({
+        queryKey: ['groupedMetricTimeSeries', group?.id, address, isFallback, start, end],
+        queryFn: () => {
+            if (!group) return Promise.resolve([] as GroupedMetricSeriesResult[]);
+            return fetchGroupedMetricTimeSeries(group, address || "", isFallback, start, end);
+        },
+        enabled: !!group && (isFallback ? isEnabled : shouldFetch),
         refetchInterval: 1000 * 15,
     });
 };

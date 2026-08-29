@@ -38,6 +38,21 @@ export type MetricType = {
     referenceLineValue?: number;
 }
 
+export type GroupMetricConfig = {
+    metric: string;
+    label: string;
+    color: string;
+    referenceLineValue?: number;
+};
+
+export type MetricGroupConfig = {
+    id: string;
+    name: string;
+    description: string;
+    category: MetricCategory;
+    metrics: GroupMetricConfig[];
+};
+
 export type MetricCategory = "number" // for ticks, entities, and similar countable metrics
 | "percentage" // say for cpu usage and related metrics
 | "ms" // for mspt or similar metric
@@ -120,4 +135,55 @@ export const allMetrics: MetricType[] = [
     }
 ];
 
-export const allMetricsFallback: MetricType[] = [allMetrics[0]];
+export const allMetricsFallback: MetricType[] = allMetrics;
+
+export const groupedMetricGroups: MetricGroupConfig[] = [
+    {
+        id: "responsiveness",
+        name: "Responsiveness",
+        description: "Tracks ticks (TPS) and MSPT together to show server responsiveness.",
+        category: "number",
+        metrics: [
+            { metric: "tps", label: "TPS", color: "#2563eb", referenceLineValue: 20 },
+            { metric: "mspt", label: "MSPT", color: "#f97316", referenceLineValue: 50 },
+        ],
+    },
+    {
+        id: "memory",
+        name: "Memory",
+        description: "Shows JVM memory metrics (heap/non-heap used and max values).",
+        category: "bytes",
+        metrics: [
+            { metric: "jvmMem", label: "Used Non-Heap", color: "#06b6d4" },
+            { metric: "jvmMemHeap", label: "Used Heap", color: "#14b8a6" },
+            { metric: "jvmMemMax", label: "Max Non-Heap", color: "#f97316" },
+            { metric: "jvmMemMaxHeap", label: "Max Heap", color: "#a855f7" },
+        ],
+    },
+    {
+        id: "cpu",
+        name: "CPU",
+        description: "CPU usage only.",
+        category: "percentage",
+        metrics: [{ metric: "cpu", label: "CPU", color: "#ef4444" }],
+    },
+    {
+        id: "general-server-metrics",
+        name: "General Server Metrics",
+        description: "All remaining server metrics excluding responsiveness, memory, and CPU groups.",
+        category: "number",
+        metrics: [
+            { metric: "entities", label: "Entities", color: "#10b981" },
+            { metric: "chunks", label: "Chunks Overworld", color: "#0ea5e9" },
+            { metric: "totalChunks", label: "Total Chunks", color: "#6366f1" },
+            { metric: "handshakes", label: "Handshakes", color: "#f59e0b" },
+            { metric: "jvmGc", label: "JVM GC", color: "#e11d48" },
+        ],
+    },
+];
+
+const fallbackMetricSet = new Set(allMetricsFallback.map((metric) => metric.value));
+
+export const groupedMetricGroupsFallback: MetricGroupConfig[] = groupedMetricGroups.filter((group) =>
+    group.metrics.every((metricConfig) => fallbackMetricSet.has(metricConfig.metric))
+);
