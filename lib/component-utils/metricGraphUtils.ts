@@ -11,6 +11,7 @@ const fetchMetricTimeSeries = async (
     metric: string,
     address: string,
     isFallback: boolean,
+    token: string | null,
     start?: number,
     end?: number,
 ): Promise<GenericMetricTimeSeries[]> => {
@@ -40,7 +41,7 @@ const fetchMetricTimeSeries = async (
     const res = await fetch(url, {
         headers: {
             'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${token}` // might configure in future
+            'Authorization': `Bearer ${token}` // might configure in future
         },
     })
     if (res.status === 401) {
@@ -93,8 +94,9 @@ const fetchGroupedMetricTimeSeries = async (
     group: MetricGroupConfig,
     address: string,
     isFallback: boolean,
+    token: string | null,
     start?: number,
-    end?: number,
+    end?: number
 ): Promise<GroupedMetricSeriesResult[]> => {
     const results = await Promise.all(
         group.metrics.map(async (metricConfig) => {
@@ -103,6 +105,7 @@ const fetchGroupedMetricTimeSeries = async (
                     metricConfig.metric,
                     address,
                     isFallback,
+                    token,
                     start,
                     end,
                 );
@@ -135,6 +138,7 @@ export const useMetricTimeSeries = (
     metric: string,
     address: string | undefined,
     isFallback: boolean,
+    token: string | null,
     start?: number,
     end?: number,
     isEnabled: boolean = true,
@@ -143,7 +147,7 @@ export const useMetricTimeSeries = (
 
     return useQuery({
         queryKey: ['metricTimeSeries', metric, address, isFallback, start, end],
-        queryFn: () => fetchMetricTimeSeries(metric, address || "", isFallback, start, end),
+        queryFn: () => fetchMetricTimeSeries(metric, address || "", isFallback, token, start, end),
         enabled: isFallback ? isEnabled : shouldFetch,
         refetchInterval: 1000 * 15,
     });
@@ -153,6 +157,7 @@ export const useGroupedMetricTimeSeries = (
     group: MetricGroupConfig | null,
     address: string | undefined,
     isFallback: boolean,
+    token: string | null,
     start?: number,
     end?: number,
     isEnabled: boolean = true,
@@ -163,7 +168,7 @@ export const useGroupedMetricTimeSeries = (
         queryKey: ['groupedMetricTimeSeries', group?.id, address, isFallback, start, end],
         queryFn: () => {
             if (!group) return Promise.resolve([] as GroupedMetricSeriesResult[]);
-            return fetchGroupedMetricTimeSeries(group, address || "", isFallback, start, end);
+            return fetchGroupedMetricTimeSeries(group, address || "", isFallback, token, start, end);
         },
         enabled: !!group && (isFallback ? isEnabled : shouldFetch),
         refetchInterval: 1000 * 15,

@@ -67,7 +67,7 @@ const PerformanceGraphs = ({
     } = useMetricState(
         address,
         isFallback,
-        // token,
+        token,
         shouldFetchMetrics
     );
 

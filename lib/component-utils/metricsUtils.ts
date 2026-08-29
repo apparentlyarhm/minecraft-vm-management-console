@@ -10,9 +10,7 @@ import {
 const fetchMetricState = async (
     address: string | undefined,
     isFallback: boolean,
-
-    // we might need token in the future
-    // token: string 
+    token: string | null
 ): Promise<MinecraftMetricsResponse> => {
     if (!address) {
         return FALLBACK
@@ -26,7 +24,7 @@ const fetchMetricState = async (
     const res = await fetch(url, {
         headers: {
             'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`
         },
     })
     if (res.status === 401) {
@@ -64,14 +62,14 @@ const FALLBACK: MinecraftMetricsResponse = {
 export const useMetricState = (
     address: string | undefined,
     isFallback: boolean,
-    // token: string,
+    token: string | null,
     isEnabled: boolean,
 ) => {
     const shouldPoll = !!address && isEnabled;
 
     return useQuery({
         queryKey: ['metrics', address, isFallback],
-        queryFn: () => fetchMetricState(address, isFallback),
+        queryFn: () => fetchMetricState(address, isFallback, token),
         enabled: shouldPoll,
         staleTime: 1000 * 1,
         placeholderData: (previousData) => previousData,

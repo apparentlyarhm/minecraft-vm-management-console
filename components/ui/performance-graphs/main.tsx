@@ -87,6 +87,7 @@ const PerformanceGraphsTab = ({
 		selectedGroup,
 		address,
 		isFallback,
+		token,
 		undefined,
 		undefined,
 		shouldFetchMetrics
