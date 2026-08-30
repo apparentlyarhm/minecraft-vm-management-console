@@ -24,7 +24,7 @@ const fetchMetricTimeSeries = async (
 
     // in fallback mode, the responsiveness group will be the only graph displayed. this 
     // will allow us to generate 2 sets of data
-    let FALLBACK_DATA = metric === "mspt" ? generateFallbackMetrics("mspt") : FALLBACK;
+    const FALLBACK_DATA = metric === "mspt" ? generateFallbackMetrics("mspt") : FALLBACK;
     
     if (!address) {
         return FALLBACK_DATA
