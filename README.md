@@ -38,12 +38,23 @@ added in late Aug 2026 -where the app went through a domain change.
 ## Metric State of the system
 <img src="./repo_assets/metric-summary.png"> 
 
-## Performance Graphs
-<img src="./repo_assets/graphs.png"> 
+## Performance Graphs Examples
+
+### Cpu
+<img src="./repo_assets/graph_cpu.png"> 
+
+### General - Entities and stuff 
+<img src="./repo_assets/graph_general.png"> 
+
+### Responsiveness - TPS & MSPT
+<img src="./repo_assets/graph_responsiveness.png">
+
+### Memory - JVM stuff
+<img src="./repo_assets/graph_mem.png"> 
 
 ## Setting up and related repos
 
-do `npm install` first as usual AND you need the corresponding Backend for this.
+do `npm install` or `bun i` first as usual AND you need the corresponding Backend for this.
 
 [the go backend](https://github.com/apparentlyarhm/validator-gcp-go)
 
