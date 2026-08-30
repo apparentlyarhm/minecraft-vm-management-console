@@ -21,13 +21,17 @@ const fetchMetricTimeSeries = async (
 
     // we dont need to enforce it here because this metric string
     // will not come from user input. 
+
+    // in fallback mode, the responsiveness group will be the only graph displayed. this 
+    // will allow us to generate 2 sets of data
+    let FALLBACK_DATA = metric === "mspt" ? generateFallbackMetrics("mspt") : FALLBACK;
+    
     if (!address) {
-        return FALLBACK
+        return FALLBACK_DATA
     }
 
     if (isFallback) {
-        console.log("Using fallback metrics");
-        return FALLBACK
+        return FALLBACK_DATA
     }
 
     const params = new URLSearchParams({
@@ -64,14 +68,24 @@ const fetchMetricTimeSeries = async (
 
 // these data points are a representation of ticks per second.
 // ideal rate for minecraft is 20 so we will just generate data around that 
-const generateFallbackMetrics = (): GenericMetricTimeSeries[] => {
+const generateFallbackMetrics = (metric?: string): GenericMetricTimeSeries[] => {
     const dataPoints: GenericMetricTimeSeries[] = [];
     const startTime = Math.floor(Date.now() / 1000) - 3600; // 1 hour ago
     const interval = 15; // 15 seconds
 
     for (let i = 0; i < 240; i++) {
         const timestamp = startTime + (i * interval);
-        const value = parseFloat((19 + Math.random() * 0.9).toFixed(5));
+        let value;
+
+        switch(metric) {
+            case "mspt":
+                value = parseFloat((19 + Math.random() * 0.9).toFixed(5)) + 25;
+                break;
+
+            default:
+                value = parseFloat((19 + Math.random() * 0.9).toFixed(5)) - 5;
+        }
+
         dataPoints.push({
             timestamp,
             value,

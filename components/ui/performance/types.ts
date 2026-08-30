@@ -184,6 +184,4 @@ export const groupedMetricGroups: MetricGroupConfig[] = [
 
 const fallbackMetricSet = new Set(allMetricsFallback.map((metric) => metric.value));
 
-export const groupedMetricGroupsFallback: MetricGroupConfig[] = groupedMetricGroups.filter((group) =>
-    group.metrics.every((metricConfig) => fallbackMetricSet.has(metricConfig.metric))
-);
+export const groupedMetricGroupsFallback: MetricGroupConfig[] = [groupedMetricGroups[0]];

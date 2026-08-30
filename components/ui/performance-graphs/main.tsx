@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, Cable } from "lucide-react";
+import { AlertCircle, Cable, CircleQuestionMark } from "lucide-react";
 import {
 	GroupedMetricSeriesResult,
 	useGroupedMetricTimeSeries,
@@ -74,7 +74,7 @@ const PerformanceGraphsTab = ({
 	// const start = React.useMemo(() => end - 3600, [end]);
 
 
-    // TODO: Allow the user to select a custom time window for the metrics.
+	// TODO: Allow the user to select a custom time window for the metrics.
 	const {
 		data: groupedData,
 		isLoading,
@@ -161,7 +161,15 @@ const PerformanceGraphsTab = ({
 							))}
 						</select>
 
-						{selectedGroup && <p className="mt-2 text-xs text-gray-500">{selectedGroup.description}</p>}
+						{selectedGroup && (
+							<>
+								<CircleQuestionMark
+									className="w-4 h-4 text-gray-400 inline-block ml-1 hover:cursor-pointer hover:text-gray-600 "
+									onClick={() => alert(selectedGroup.description)} // TODO: change to the main modal this app
+
+								/>
+							</>
+						)}
 					</div>
 
 					{renderContent()}
@@ -228,8 +236,6 @@ const GROUPED_DATA = ({
 	isStale: boolean;
 }) => (
 	<div className={`transition-opacity duration-200 ${isStale ? "opacity-50" : "opacity-100"}`}>
-		<h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">{groupLabel}</h3>
-
 		<GroupedGraphWrapper series={series} metricCategory={groupCategory} height={400} />
 	</div>
 );

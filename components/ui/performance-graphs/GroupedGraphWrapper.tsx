@@ -11,7 +11,8 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
-import { GenericMetricTimeSeries, MetricCategory } from "../performance/types";
+import { allMetrics, allMetricsFallback, GenericMetricTimeSeries, MetricCategory } from "../performance/types";
+import GroupedGraphTooltip from "./GroupedGraphTooltip";
 
 export type GroupedSeries = {
     metric: string;
@@ -90,6 +91,17 @@ const GroupedGraphWrapper = ({
         [metricCategory]
     );
 
+    const metricDescriptions = React.useMemo(() => {
+        const knownMetrics = [...allMetrics, ...allMetricsFallback];
+        const map = new Map<string, string>();
+        for (const metric of knownMetrics) {
+            if (metric?.description) {
+                map.set(metric.value, metric.description);
+            }
+        }
+        return map;
+    }, []);
+
     if (series.length === 0 || combinedData.length === 0) {
         return (
             <div className="flex h-64 items-center justify-center text-xs text-gray-400 border rounded-md">
@@ -116,11 +128,19 @@ const GroupedGraphWrapper = ({
                     />
 
                     <Tooltip
-                        labelFormatter={(label) => formatTimestamp(Number(label))}
-                        formatter={(value, name) => [formatValue(Number(value)), name]}
+                        content={({ active, payload, label }) => (
+                            <GroupedGraphTooltip
+                                active={active}
+                                payload={payload}
+                                label={label}
+                                metricDescriptions={metricDescriptions}
+                                formatTimestamp={formatTimestamp}
+                                formatValue={formatValue}
+                            />
+                        )}
                     />
 
-                    <Legend verticalAlign="top" height={36} />
+                    <Legend verticalAlign="top" height={40} />
 
                     {series.map((seriesEntry) => (
                         <Line
@@ -131,7 +151,7 @@ const GroupedGraphWrapper = ({
                             strokeWidth={2}
                             dot={false}
                             name={seriesEntry.label}
-                            isAnimationActive={false}
+                            isAnimationActive={true}
                             connectNulls
                         />
                     ))}
