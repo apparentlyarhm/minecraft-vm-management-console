@@ -116,16 +116,21 @@ export default function VMDashboard() {
   const { variant, bg, icon: Icon, } = getStatusStyles(details["Status"] as string);
 
   const handleIpAdd = async () => {
+    const token = localStorage.getItem("app_token");
+
+    if (!token) {
+      error({
+        heading: "Login required",
+        message: "Please login again to whitelist your IP",
+        duration: 3000,
+      });
+      return;
+    }
 
     setIsWhitelisting(true);
-    info({
-      heading: "Request sent",
-      message: "IP will be added",
-      duration: 2000,
-    });
 
     if (ip != null) {
-      addIpToFirewall({ address: ip, passcode: "test" })
+      addIpToFirewall(token, { address: ip, passcode: "test" })
         .then((message) => {
           success({
             heading: "Done!",

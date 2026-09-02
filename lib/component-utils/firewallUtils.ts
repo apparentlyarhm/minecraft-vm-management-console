@@ -7,15 +7,27 @@ type AddressAddRequest = {
 };
 
 export async function addIpToFirewall(
+  token: string,
   request: AddressAddRequest
 ): Promise<{ message: string }> {
+
   const res = await fetch(API_ENDPOINTS.IP, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify(request),
   });
+
+  if (res.status === 401) {
+    await initiateLogin()
+    throw new Error("Need to login. Please wait..")
+  }
+
+  if (res.status === 403) {
+    throw new Error("You do not have permission to whitelist yourself");
+  }
 
   if (!res.ok) {
     const err = await res.json();
@@ -27,8 +39,8 @@ export async function addIpToFirewall(
 
 
 export async function checkIpInFirewall(ip: string, isFallback: boolean): Promise<{ message: string }> {
-  if (isFallback){
-    return {"message": "NOT_PRESENT"} // some string
+  if (isFallback) {
+    return { "message": "NOT_PRESENT" } // some string
   }
   const res = await fetch(`${API_ENDPOINTS.CHECK_IP}?ip=${encodeURIComponent(ip)}`, {
     method: 'GET',
@@ -52,17 +64,17 @@ export async function purgeFirewall(
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,    
-},
+      'Authorization': `Bearer ${token}`,
+    },
   });
 
-  if (res.status === 401 ) {
+  if (res.status === 401) {
     // 401 always means that we need to login
     await initiateLogin()
   }
 
   const data = await res.json()
-  if (res.status === 403){
+  if (res.status === 403) {
     // server knows who we are, we are just not allowed to do this operation.
     throw new Error(data["message"]);
   }
@@ -81,17 +93,17 @@ export async function makeServerPublic(
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,    
-},
+      'Authorization': `Bearer ${token}`,
+    },
   });
 
-  if (res.status === 401 ) {
+  if (res.status === 401) {
     // 401 always means that we need to login
     await initiateLogin()
   }
 
   const data = await res.json()
-  if (res.status === 403){
+  if (res.status === 403) {
     // server knows who we are, we are just not allowed to do this operation.
     throw new Error(data["message"]);
   }

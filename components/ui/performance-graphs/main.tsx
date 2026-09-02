@@ -110,7 +110,7 @@ const PerformanceGraphsTab = ({
 			return <EmptyState text="No grouped graph options are available for the current data source." />;
 		}
 
-		if (!groupedData || groupedData.length === 0 || groupedData.every((series) => series.points.length === 0)) {
+		if (!groupedData || groupedData.length === 0 || groupedData.every((series) => series.points.length === 0) && !isError) {
 			return <EmptyState text="No grouped graph data found." />;
 		}
 

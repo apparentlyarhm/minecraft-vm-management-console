@@ -5,6 +5,16 @@ import {
     useQuery,
 } from '@tanstack/react-query'
 
+type HttpError = Error & {
+    status?: number;
+};
+
+const createHttpError = (message: string, status: number): HttpError => {
+    const err = new Error(message) as HttpError;
+    err.status = status;
+    return err;
+};
+
 
 
 const fetchMetricTimeSeries = async (
@@ -50,11 +60,11 @@ const fetchMetricTimeSeries = async (
     })
     if (res.status === 401) {
         await initiateLogin()
-        throw new Error("Need to login. Please wait..")
+        throw createHttpError("Need to login. Please wait..", 401)
     }
 
     if (res.status === 403) {
-        throw new Error("You dont have permissions to view metrics of the server")
+        throw createHttpError("You dont have permissions to view metrics of the server", 403)
     }
 
     if (!res.ok) {
@@ -132,6 +142,11 @@ const fetchGroupedMetricTimeSeries = async (
                     referenceLineValue: metricConfig.referenceLineValue,
                 };
             } catch (error) {
+                const httpError = error as HttpError;
+                if (httpError.status === 401 || httpError.status === 403) {
+                    throw error;
+                }
+
                 // console.error(`Failed to fetch grouped metric ${metricConfig.metric}`, error);
                 return {
                     metric: metricConfig.metric,
